@@ -1,0 +1,7 @@
+---
+title: "Team Proposal"
+author: "Angelica Bailey, Shivalika Chavan, Julia Gray \n"
+date: "2025-11-05"
+output: github_document
+---
+
