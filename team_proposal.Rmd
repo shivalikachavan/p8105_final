@@ -5,11 +5,11 @@ date: "2025-11-07"
 output: github_document
 ---
 
-**[Link to GitHub Repo](https://github.com/shivalikachavan/p8105_final)**
+[**Link to GitHub Repo**](https://github.com/shivalikachavan/p8105_final)
 
 #### Motivation
 
-Following the [2018 Supreme Court decision](https://www.klgates.com/Supreme-Court-Strikes-Down-Ban-on-Sports-Wagering-05-18-2018 ) to rescind the Professional and Amateur Sports Protection Act (PASPA), 39 states have legalized sports gambling, and we would like to look at the public health effects of this decision. More recently, there was a lot of media buzz over the [NBA gambling scandal](https://www.nytimes.com/2025/10/23/nyregion/nba-gambling-scandal-explained.html) and an ongoing debate over [NCAA rules]( https://www.espn.com/college-sports/story/_/id/46762598/ncaa-delays-rule-change-permitting-college-athletes-bet-professional-sports) regarding athlete gambling, involving the increasingly popular player-specific proposition “prop” bets. 
+Following the [2018 Supreme Court decision](https://www.klgates.com/Supreme-Court-Strikes-Down-Ban-on-Sports-Wagering-05-18-2018) to rescind the Professional and Amateur Sports Protection Act (PASPA), 39 states have legalized sports gambling, and we would like to look at the public health effects of this decision. More recently, there was a lot of media buzz over the [NBA gambling scandal](https://www.nytimes.com/2025/10/23/nyregion/nba-gambling-scandal-explained.html) and an ongoing debate over [NCAA rules](https://www.espn.com/college-sports/story/_/id/46762598/ncaa-delays-rule-change-permitting-college-athletes-bet-professional-sports) regarding athlete gambling, involving the increasingly popular player-specific proposition “prop” bets.
 
 The specific questions we aim to answer are:
 
@@ -19,13 +19,20 @@ The specific questions we aim to answer are:
 
 3.  Using the 2018 as the inflection point, are these health outcomes stratified by demographics (age, sex, race, tax bracket, and education level) and state?
 
-
 #### Intended Final Products
+
+-   Exploratory data analyses of key variables
+
+-   Statistical report detailing methods & analyses, results, and discussion
+
+-   Webpage and screencast describing our project
+
 #### Anticipated Data Sources
 
-i. American Gaming Association: https://www.americangaming.org/research/state-of-play-map/
-ii. CDC Behavioral Risk Factor Surveillance System: https://www.cdc.gov/brfss/
-iii. NY Council on Problem Gambling: https://nyproblemgambling.org/resource-lib-item/sports-betting-research-data-summary/#SUD  
+i.  American Gaming Association: <https://www.americangaming.org/research/state-of-play-map/>
+ii. CDC Behavioral Risk Factor Surveillance System: <https://www.cdc.gov/brfss/>
+iii. NY Council on Problem Gambling: <https://nyproblemgambling.org/resource-lib-item/sports-betting-research-data-summary/#SUD>
 
 #### Planned Analyses, Visualizations, Coding Challenges
+
 #### Planned Timeline
