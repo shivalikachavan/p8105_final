@@ -5,8 +5,8 @@ Angelica Bailey (ab6168), Shivalika Chavan (sc5826), Julia Gray (jg5038)
 
 2025-11-07
 
-**[Link to GitHub
-Repo](https://github.com/shivalikachavan/p8105_final)**
+[**Link to GitHub
+Repo**](https://github.com/shivalikachavan/p8105_final)
 
 #### Motivation
 
@@ -39,8 +39,37 @@ The specific questions we aim to answer are:
 
 #### Intended Final Products
 
+- Exploratory data analyses of key variables
+
+- Statistical report detailing methods & analyses, results, and
+  discussion
+
+- Webpage and screencast describing our project
+
 #### Anticipated Data Sources
+
+1.  American Gaming Association:
+    <https://www.americangaming.org/research/state-of-play-map/>
+2.  CDC Behavioral Risk Factor Surveillance System:
+    <https://www.cdc.gov/brfss/>
+3.  NY Council on Problem Gambling:
+    <https://nyproblemgambling.org/resource-lib-item/sports-betting-research-data-summary/#SUD>
 
 #### Planned Analyses, Visualizations, Coding Challenges
 
 #### Planned Timeline
+
+- **November 6–12:** **Finalize Data & Variables** - Finalize all data
+  sources and variables required for analysis.
+- **November 13–23:** **Individual Analysis Work** - Execute and
+  complete all individual components of the project analysis.
+- **November 24–26:** **Review, Edit, & Visualizations** - Review and
+  incorporate any edits/changes to the analysis. Make all data
+  visualizations look pretty + cohesive
+- **November 27–28:** - Scheduled break for Thanksgiving (and maybe some
+  light sports betting)
+- **November 29–December 1:** - Draft of the final project report.
+- **December 2–4:** - Transfer all materials (proposal, analysis, final
+  report) to the project webpage (and make things look nice).
+- **December 5:** - Record the final project presentation screencast.
+- **December 6:** Complete all final submissions.
