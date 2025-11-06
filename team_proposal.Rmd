@@ -21,6 +21,7 @@ The specific questions we aim to answer are:
 
 
 #### Intended Final Products
+
 #### Anticipated Data Sources
 #### Planned Analyses, Visualizations, Coding Challenges
 #### Planned Timeline
