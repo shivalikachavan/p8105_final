@@ -31,14 +31,11 @@ The specific questions we aim to answer are:
 2.  Does legalized sports gambling have a negative effect on public
     health outcomes? This involves analyzing changes in rates of
     depression (or other mental disorders), domestic violence, and
-    substance abuse for active gamblers and those linked to them
-    (domestic partners, children, etc.), and assessing financial health
-    metrics (excessive debt, bankruptcy, credit score delinquencies,
-    amount of money sent to debt collectors, etc.).
+    substance abuse in states where sports betting is legal.
 
-3.  Using the 2018 as the inflection point, are these health and
-    financial effects stratified by demographics (age, sex, race, tax
-    bracket, and education level) and state?
+3.  Using the 2018 as the inflection point, are these health outcomes
+    stratified by demographics (age, sex, race, tax bracket, and
+    education level) and state?
 
 #### Intended Final Products
 
