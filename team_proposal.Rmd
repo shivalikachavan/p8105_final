@@ -22,5 +22,10 @@ The specific questions we aim to answer are:
 
 #### Intended Final Products
 #### Anticipated Data Sources
+
+i. American Gaming Association: https://www.americangaming.org/research/state-of-play-map/
+ii. CDC Behavioral Risk Factor Surveillance System: https://www.cdc.gov/brfss/
+iii. NY Council on Problem Gambling: https://nyproblemgambling.org/resource-lib-item/sports-betting-research-data-summary/#SUD  
+
 #### Planned Analyses, Visualizations, Coding Challenges
 #### Planned Timeline
