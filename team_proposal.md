@@ -33,9 +33,10 @@ The specific questions we aim to answer are:
     depression (or other mental disorders), domestic violence, and
     substance abuse in states where sports betting is legal.
 
-3.  Using the 2018 as the inflection point, are these health outcomes
-    stratified by demographics (age, sex, race, tax bracket, and
-    education level) and state?
+3.  Using the each state’s legalization dat (if one exists) as the
+    inflection point, are these health outcomes stratified by
+    demographics (age, sex, race, tax bracket, and education level) and
+    state?
 
 #### Intended Final Products
 
@@ -63,7 +64,7 @@ The specific questions we aim to answer are:
   complete all individual components of the project analysis.
 - **November 24–26:** **Review, Edit, & Visualizations** - Review and
   incorporate any edits/changes to the analysis. Make all data
-  visualizations look pretty + cohesive
+  visualizations look pretty + cohesive.
 - **November 27–28:** Scheduled break for Thanksgiving (and maybe some
   light sports betting)
 - **November 29–December 1:** Draft of the final project report.
