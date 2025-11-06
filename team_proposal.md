@@ -10,6 +10,36 @@ Repo](https://github.com/shivalikachavan/p8105_final)**
 
 #### Motivation
 
+Following the [2018 Supreme Court
+decision](https://www.klgates.com/Supreme-Court-Strikes-Down-Ban-on-Sports-Wagering-05-18-2018)
+to rescind the Professional and Amateur Sports Protection Act (PASPA),
+39 states have legalized sports gambling, and we would like to look at
+the public health effects of this decision. More recently, there was a
+lot of media buzz over the [NBA gambling
+scandal](https://www.nytimes.com/2025/10/23/nyregion/nba-gambling-scandal-explained.html)
+and an ongoing debate over [NCAA
+rules](https://www.espn.com/college-sports/story/_/id/46762598/ncaa-delays-rule-change-permitting-college-athletes-bet-professional-sports)
+regarding athlete gambling, involving the increasingly popular
+player-specific proposition “prop” bets.
+
+The specific questions we aim to answer are:
+
+1.  Did the total (inflation-adjusted) handle (total amount of money
+    wagered) for sportsbooks increase significantly across states after
+    2018?
+
+2.  Does legalized sports gambling have a negative effect on public
+    health outcomes? This involves analyzing changes in rates of
+    depression (or other mental disorders), domestic violence, and
+    substance abuse for active gamblers and those linked to them
+    (domestic partners, children, etc.), and assessing financial health
+    metrics (excessive debt, bankruptcy, credit score delinquencies,
+    amount of money sent to debt collectors, etc.).
+
+3.  Using the 2018 as the inflection point, are these health and
+    financial effects stratified by demographics (age, sex, race, tax
+    bracket, and education level) and state?
+
 #### Intended Final Products
 
 #### Anticipated Data Sources
