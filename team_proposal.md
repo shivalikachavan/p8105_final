@@ -40,10 +40,8 @@ The specific questions we aim to answer are:
 #### Intended Final Products
 
 - Exploratory data analyses of key variables
-
 - Statistical report detailing methods & analyses, results, and
   discussion
-
 - Webpage and screencast describing our project
 
 #### Anticipated Data Sources
