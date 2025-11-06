@@ -59,7 +59,9 @@ The specific questions we aim to answer are:
 #### Planned Analyses, Visualizations, Coding Challenges
 
 - Visualizations: State by state choropleth of total sports gambling
-  handle,
+  handle, trend line of incidence of depression for states that have
+  legalized sports gambling vs. have (normalized to date of legalization
+  for each state).
 - Analyses: Incidence of health outcomes before and after sports
   gambling legalization with hypothesis testing and linear modeling
 - Coding challenges: Normalizing all state data to pre-imposed
