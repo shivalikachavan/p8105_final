@@ -64,10 +64,10 @@ The specific questions we aim to answer are:
 - **November 24–26:** **Review, Edit, & Visualizations** - Review and
   incorporate any edits/changes to the analysis. Make all data
   visualizations look pretty + cohesive
-- **November 27–28:** - Scheduled break for Thanksgiving (and maybe some
+- **November 27–28:** Scheduled break for Thanksgiving (and maybe some
   light sports betting)
-- **November 29–December 1:** - Draft of the final project report.
-- **December 2–4:** - Transfer all materials (proposal, analysis, final
+- **November 29–December 1:** Draft of the final project report.
+- **December 2–4:** Transfer all materials (proposal, analysis, final
   report) to the project webpage (and make things look nice).
-- **December 5:** - Record the final project presentation screencast.
+- **December 5:** Record the final project presentation screencast.
 - **December 6:** Complete all final submissions.
