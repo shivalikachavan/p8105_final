@@ -25,7 +25,7 @@ player-specific proposition “prop” bets.
 The specific questions we aim to answer are:
 
 1.  Did the total (inflation-adjusted) handle (total amount of money
-    wagered) for sportsbooks increase significantly across states after
+    wagered) for sports books increase significantly across states after
     2018?
 
 2.  Does legalized sports gambling have a negative effect on public
@@ -33,7 +33,7 @@ The specific questions we aim to answer are:
     depression (or other mental disorders), domestic violence, and
     substance abuse in states where sports betting is legal.
 
-3.  Using the each state’s legalization dat (if one exists) as the
+3.  Using the each state’s legalization date (if one exists) as the
     inflection point, are these health outcomes stratified by
     demographics (age, sex, race, tax bracket, and education level) and
     state?
@@ -43,16 +43,18 @@ The specific questions we aim to answer are:
 - Exploratory data analyses of key variables
 - Statistical report detailing methods & analyses, results, and
   discussion
-- Webpage and screencast describing our project
+- Webpage and screen cast describing our project
 
 #### Anticipated Data Sources
 
-1.  American Gaming Association:
-    <https://www.americangaming.org/research/state-of-play-map/>
-2.  CDC Behavioral Risk Factor Surveillance System:
-    <https://www.cdc.gov/brfss/>
-3.  NY Council on Problem Gambling:
-    <https://nyproblemgambling.org/resource-lib-item/sports-betting-research-data-summary/#SUD>
+- American Gaming Association:
+  <https://www.americangaming.org/research/state-of-play-map/>
+- CDC Behavioral Risk Factor Surveillance System:
+  <https://www.cdc.gov/brfss/>
+- NY Council on Problem Gambling:
+  <https://nyproblemgambling.org/resource-lib-item/sports-betting-research-data-summary/#SUD>
+- US Sports Betting Revenue & Handle
+  <https://www.legalsportsreport.com/sports-betting-states/revenue/>
 
 #### Planned Analyses, Visualizations, Coding Challenges
 
@@ -70,5 +72,5 @@ The specific questions we aim to answer are:
 - **November 29–December 1:** Draft of the final project report.
 - **December 2–4:** Transfer all materials (proposal, analysis, final
   report) to the project webpage (and make things look nice).
-- **December 5:** Record the final project presentation screencast.
+- **December 5:** Record the final project presentation screen cast.
 - **December 6:** Complete all final submissions.
