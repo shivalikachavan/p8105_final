@@ -52,9 +52,9 @@ for (i in seq_along(pull(states, value))) {
 sb_rev_market_month_df = bind_rows(all_state_data)
 
 #Save output
-write_csv(sb_rev_market_df, file = "./data/lsr_sb_rev_market.csv")
-write_csv(sb_rev_month_df, file = "./data/lsr_sb_rev_month.csv")
-write_csv(sb_rev_market_month_df, file = "./data/lsr_sb_rev_market_month.csv")
+write_csv(sb_rev_market_df, file = "./clean_data/lsr_sb_rev_market.csv")
+write_csv(sb_rev_month_df, file = "./clean_data/lsr_sb_rev_month.csv")
+write_csv(sb_rev_market_month_df, file = "./clean_data/lsr_sb_rev_market_month.csv")
 ```
 
 ## Get State Legalization Dates
@@ -70,7 +70,7 @@ state_legal_df[nrow(state_legal_df) + 1,] = list("Maine", "Nov-23", "Nov-23", "S
 state_legal_df[nrow(state_legal_df) + 1,] = list("Vermont", "Jan-24", "Jan-24", NA)
 
 #Save updated version
-write_csv(sb_rev_market_df, file = "./data/state_legalization_dates.csv")
+write_csv(sb_rev_market_df, file = "./clean_data/state_legalization_dates.csv")
 ```
 
 
