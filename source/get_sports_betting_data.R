@@ -27,17 +27,46 @@ states = as.tibble(lsr_html |>
 ) |> #NO Data for Florida, Washington
   filter(! value %in% c("Florida","New Mexico", "North Dakota", "Washington", "Wisconsin"))
 
+string_replacements = c("," = "", "$" = "")
+
 #First table is: US sports betting revenue by month
-sb_rev_market_df = tables[[1]]
+sb_rev_market_df = tables[[1]] |> 
+  janitor::clean_names() |> 
+  mutate(
+    handle = as.numeric(str_replace_all(handle, c("\\$" = "", "," = ""))),
+    revenue = as.numeric(str_replace_all(revenue, c("\\$" = "", "," = ""))),
+    taxes = as.numeric(str_replace_all(taxes, c("\\$" = "", "," = ""))),
+    hold = as.numeric(str_replace_all(hold, c("\\%" = ""))),
+  )
 
 #Second table is: US sports betting revenue by market
-sb_rev_month_df = tables[[2]]
+sb_rev_month_df = tables[[2]] |> 
+  janitor::clean_names() |> 
+  filter(month != "Total") |> 
+  mutate(
+    month = lubridate::myd(str_c(month, " 01")),
+    handle = as.numeric(str_replace_all(handle, c("\\$" = "", "," = ""))),
+    revenue = as.numeric(str_replace_all(revenue, c("\\$" = "", "," = ""))),
+    taxes = as.numeric(str_replace_all(taxes, c("\\$" = "", "," = ""))),
+    hold = as.numeric(str_replace_all(hold, c("\\%" = ""))),
+  )
+
 
 #Combine all state/month data into single table
 all_state_data = list()
 for (i in seq_along(pull(states, value))) {
   state_table = tables[[i+2]] |> 
-    mutate(State = pull(states, value)[i])
+    janitor::clean_names() |> 
+    filter(month != "Total") |> 
+    mutate(
+      state = pull(states, value)[i],
+      month = lubridate::myd(str_c(month, " 01")),
+      handle = as.numeric(str_replace_all(handle, c("\\$" = "", "," = ""))),
+      revenue = as.numeric(str_replace_all(revenue, c("\\$" = "", "," = ""))),
+      taxes = as.numeric(str_replace_all(taxes, c("\\$" = "", "," = ""))),
+      hold = as.numeric(str_replace_all(hold, c("\\%" = ""))),
+    )
+    
   all_state_data[[i]] = state_table
 }
 
