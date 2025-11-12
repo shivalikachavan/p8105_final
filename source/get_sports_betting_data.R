@@ -1,0 +1,49 @@
+library(tidyverse)
+library(rvest)
+library(httr)
+
+#Get sports betting data by month/state from legal sports report
+
+#Choose local version (for debugging) or live
+#url = "https://www.legalsportsreport.com/sports-betting-states/revenue/"
+url = "./data/raw_data/2025_11_09_legal_sports_report.html"
+
+
+#Pull all tables
+lsr_html = read_html(url)
+
+tables = lsr_html |>
+  html_table()
+
+table_headers = as_tibble(lsr_html |> 
+                            html_elements(css = "h2") |> 
+                            html_text(trim = TRUE)
+)
+
+#Get all states names
+states = as.tibble(lsr_html |> 
+                     html_elements('.question__button') |> 
+                     html_text(trim = TRUE)
+) |> #NO Data for Florida, Washington
+  filter(! value %in% c("Florida","New Mexico", "North Dakota", "Washington", "Wisconsin"))
+
+#First table is: US sports betting revenue by month
+sb_rev_market_df = tables[[1]]
+
+#Second table is: US sports betting revenue by market
+sb_rev_month_df = tables[[2]]
+
+#Combine all state/month data into single table
+all_state_data = list()
+for (i in seq_along(pull(states, value))) {
+  state_table = tables[[i+2]] |> 
+    mutate(State = pull(states, value)[i])
+  all_state_data[[i]] = state_table
+}
+
+sb_rev_market_month_df = bind_rows(all_state_data)
+
+#Save output
+write_csv(sb_rev_market_df, file = "../data/clean_data/sb_rev_by_state.csv")
+write_csv(sb_rev_month_df, file = "../data/clean_data/sb_rev_by_month.csv")
+write_csv(sb_rev_market_month_df, file = "../data/clean_data/sb_rev_by_state_month.csv")
