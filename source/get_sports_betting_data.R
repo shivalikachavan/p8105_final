@@ -44,6 +44,20 @@ for (i in seq_along(pull(states, value))) {
 sb_rev_market_month_df = bind_rows(all_state_data)
 
 #Save output
-write_csv(sb_rev_market_df, file = "../data/clean_data/sb_rev_by_state.csv")
-write_csv(sb_rev_month_df, file = "../data/clean_data/sb_rev_by_month.csv")
-write_csv(sb_rev_market_month_df, file = "../data/clean_data/sb_rev_by_state_month.csv")
+write_csv(sb_rev_market_df, file = "./data/legal_sports_report/sb_rev_by_state.csv")
+write_csv(sb_rev_month_df, file = "./data/legal_sports_report/sb_rev_by_month.csv")
+write_csv(sb_rev_market_month_df, file = "./data/legal_sports_report/sb_rev_by_state_month.csv")
+
+
+#Get legalization dates
+#https://www.americangaming.org/research/state-of-play-map/
+#table from Hollenbeck et al. (2024)
+
+state_legal_df = read_csv("./data/raw_data/state_legalization_dates.csv")
+
+state_legal_df[nrow(state_legal_df) + 1,] = list("Kentucky", "Sep-23", "Sep-23", "Sep-23")
+state_legal_df[nrow(state_legal_df) + 1,] = list("Maine", "Nov-23", "Nov-23", "Sep-24")
+state_legal_df[nrow(state_legal_df) + 1,] = list("Vermont", "Jan-24", "Jan-24", NA)
+
+#Save updated version
+write_csv(sb_rev_market_df, file = "./data/legal_sports_report/state_legalization_dates.csv")
