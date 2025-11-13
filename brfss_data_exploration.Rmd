@@ -8,6 +8,8 @@ output: github_document
 ```{r setup, include=FALSE}
 library(tidyverse)
 library(haven)
+source("./source/clean_brfss_data.R")
+source("./source/standardize_brfss_variable.R")
 ```
 
 ## Reading BRFSS Raw Data (from XTP)
@@ -23,10 +25,11 @@ Coding the ones we want
 ```{r}
 data_year = 2024
 
-
 brfss_2024_data_clean = 
   brfss_2024_data_raw |> 
-  select(qstver, dispcode, state, seqno, iyear, imonth, iday, sexvar, marital, educag, employ1, children, incomg1, hlthpl2, urbstat, imprace, ageg5yr, genhlth, rfhlth, physhlth, phys14d, menthlth, ment14d, poorhlth, medcost1, totinda, michd, addepev3, decide, diffalon, lsatisfy, emtsuprt,  sdlonely, sdhemply, sdhbills, sdhutils, rfbing6, rfdrhv9
+  select(qstver, dispcode, state, seqno, iyear, imonth, iday, 
+         sexvar, marital, educag, employ1, children, incomg1, urbstat, imprace, ageg5yr, hlthpl2, 
+         genhlth, rfhlth, physhlth, phys14d, menthlth, ment14d, poorhlth, medcost1, totinda, michd, addepev3, decide, diffalon, lsatisfy, emtsuprt,  sdlonely, sdhemply, sdhbills, sdhutils, rfbing6, rfdrhv9
          ) |> 
   filter(dispcode == 1100) |> # only selecting completed interviews
   mutate(
@@ -199,9 +202,7 @@ brfss_2024_data_clean =
     financial_strain_bills = case_match(sdhbills, 1 ~ "Yes", 2 ~ "No", .default = NA) |> as.factor(),
     financial_strain_utilities = case_match(sdhbills, 1 ~ "Yes", 2 ~ "No", .default = NA) |> as.factor()
     ) |> 
-  
   filter(year(date) == data_year) |>
-  
   # dropping any overwritten variables
   select( 
     #Survey Identifiers
@@ -214,10 +215,31 @@ brfss_2024_data_clean =
     mental_health, mental_health_not_good_days, poor_health, depressive_disorder, difficulty_self_care,
     life_satisfaction, emotional_support, loneliness,
     lost_reduced_employment, financial_strain_bills, financial_strain_utilities
-  ) 
-
+  )
   
 colnames(brfss_2024_data_clean)
 ```
 
- 
+Testing the function
+```{r}
+brfss_2024_data_clean = 
+  brfss_2024_data_raw |> 
+  standardize_brfss_variable() |> 
+  clean_brfss_data(year = 2024)
+
+brfss_2023_data_clean = 
+  brfss_2023_data_raw |> 
+  standardize_brfss_variable() |> 
+  clean_brfss_data(year = 2023)
+
+brfss_2023_data_clean = 
+  read_xpt("./data/raw_data/brfss/LLCP2023.XPT") |> 
+  janitor::clean_names() |> 
+  standardize_brfss_variable() |> 
+  clean_brfss_data(year = 2023)
+
+
+
+```
+
+
