@@ -3,6 +3,10 @@ BRFSS Data Exploration
 Shivalika Chavan
 2025-11-12
 
+This document takes an initial look at the BRFSS data so we can
+understand what variables exist in the data set and which
+predictors/outcome/identifiers we want to use in our project.
+
 ## Reading BRFSS Raw Data (from XTP)
 
 ``` r
@@ -68,15 +72,16 @@ Anticipating some variable name changes between 2017 and 2024 so will
 probably need to search for those to make sure the right ones are being
 selected when the below code turns into a function.
 
-Coding the ones we want
+Coding the ones we want for a single data set from 2024.
 
 ``` r
 data_year = 2024
 
-
 brfss_2024_data_clean = 
   brfss_2024_data_raw |> 
-  select(qstver, dispcode, state, seqno, iyear, imonth, iday, sexvar, marital, educag, employ1, children, incomg1, hlthpl2, urbstat, imprace, ageg5yr, genhlth, rfhlth, physhlth, phys14d, menthlth, ment14d, poorhlth, medcost1, totinda, michd, addepev3, decide, diffalon, lsatisfy, emtsuprt,  sdlonely, sdhemply, sdhbills, sdhutils, rfbing6, rfdrhv9
+  select(qstver, dispcode, state, seqno, iyear, imonth, iday, 
+         sexvar, marital, educag, employ1, children, incomg1, urbstat, imprace, ageg5yr, hlthpl2, 
+         genhlth, rfhlth, physhlth, phys14d, menthlth, ment14d, poorhlth, medcost1, totinda, michd, addepev3, decide, diffalon, lsatisfy, emtsuprt,  sdlonely, sdhemply, sdhbills, sdhutils, rfbing6, rfdrhv9
          ) |> 
   filter(dispcode == 1100) |> # only selecting completed interviews
   mutate(
@@ -249,9 +254,7 @@ brfss_2024_data_clean =
     financial_strain_bills = case_match(sdhbills, 1 ~ "Yes", 2 ~ "No", .default = NA) |> as.factor(),
     financial_strain_utilities = case_match(sdhbills, 1 ~ "Yes", 2 ~ "No", .default = NA) |> as.factor()
     ) |> 
-  
   filter(year(date) == data_year) |>
-  
   # dropping any overwritten variables
   select( 
     #Survey Identifiers
@@ -264,8 +267,7 @@ brfss_2024_data_clean =
     mental_health, mental_health_not_good_days, poor_health, depressive_disorder, difficulty_self_care,
     life_satisfaction, emotional_support, loneliness,
     lost_reduced_employment, financial_strain_bills, financial_strain_utilities
-  ) 
-
+  )
   
 colnames(brfss_2024_data_clean)
 ```
@@ -302,3 +304,7 @@ colnames(brfss_2024_data_clean)
     ## [30] "lost_reduced_employment"               
     ## [31] "financial_strain_bills"                
     ## [32] "financial_strain_utilities"
+
+Now I will write functions in `source` folder to deal with the remaining
+data sets from 2017-2023 and any challenges that come with that. This is
+done in `brfss_data_cleaning.Rmd`

@@ -8,9 +8,9 @@ output: github_document
 ```{r setup, include=FALSE}
 library(tidyverse)
 library(haven)
-source("./source/clean_brfss_data.R")
-source("./source/standardize_brfss_variable.R")
 ```
+
+This document takes an initial look at the BRFSS data so we can understand what variables exist in the data set and which predictors/outcome/identifiers we want to use in our project. 
 
 ## Reading BRFSS Raw Data (from XTP)
 ```{r}
@@ -21,7 +21,7 @@ colnames(brfss_2024_data_raw)
 
 Lots of columns (`r ncol(brfss_2024_data_raw)`) to be exact. We definitely don't need all of them. Anticipating some variable name changes between 2017 and 2024 so will probably need to search for those to make sure the right ones are being selected when the below code turns into a function. 
 
-Coding the ones we want
+Coding the ones we want for a single data set from 2024.
 ```{r}
 data_year = 2024
 
@@ -220,26 +220,4 @@ brfss_2024_data_clean =
 colnames(brfss_2024_data_clean)
 ```
 
-Testing the function
-```{r}
-brfss_2024_data_clean = 
-  brfss_2024_data_raw |> 
-  standardize_brfss_variable() |> 
-  clean_brfss_data(year = 2024)
-
-brfss_2023_data_clean = 
-  brfss_2023_data_raw |> 
-  standardize_brfss_variable() |> 
-  clean_brfss_data(year = 2023)
-
-brfss_2023_data_clean = 
-  read_xpt("./data/raw_data/brfss/LLCP2023.XPT") |> 
-  janitor::clean_names() |> 
-  standardize_brfss_variable() |> 
-  clean_brfss_data(year = 2023)
-
-
-
-```
-
-
+Now I will write functions in `source` folder to deal with the remaining data sets from 2017-2023 and any challenges that come with that. This is done in `brfss_data_cleaning.Rmd`
