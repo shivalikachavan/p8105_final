@@ -82,11 +82,23 @@ write_csv(sb_rev_market_month_df, file = "./data/legal_sports_report/sb_rev_by_s
 #https://www.americangaming.org/research/state-of-play-map/
 #table from Hollenbeck et al. (2024)
 
-state_legal_df = read_csv("./data/raw_data/state_legalization_dates.csv")
+state_fips_df = read_csv("./data/legal_sports_report/state_fips.csv")
+
+state_legal_df = read_csv("./data/raw_data/state_legalization_dates.csv") |> 
+  janitor::clean_names()
 
 state_legal_df[nrow(state_legal_df) + 1,] = list("Kentucky", "Sep-23", "Sep-23", "Sep-23")
 state_legal_df[nrow(state_legal_df) + 1,] = list("Maine", "Nov-23", "Nov-23", "Sep-24")
 state_legal_df[nrow(state_legal_df) + 1,] = list("Vermont", "Jan-24", "Jan-24", NA)
 
+state_legal_df = state_legal_df |> 
+  mutate(
+    first_start = lubridate::myd(str_c(first_start, "-01")),
+    online = lubridate::myd(str_c(online, "-01")),
+    offline = lubridate::myd(str_c(offline, "-01"))
+  )
+
+state_legal_df = left_join(state_legal_df, state_fips_df, by = "state")
+
 #Save updated version
-write_csv(sb_rev_market_df, file = "./data/legal_sports_report/state_legalization_dates.csv")
+write_csv(state_legal_df, file = "./data/legal_sports_report/state_legalization_dates.csv")
