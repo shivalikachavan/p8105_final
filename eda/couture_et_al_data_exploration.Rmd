@@ -1,0 +1,137 @@
+---
+title: "couture_et_al_data_exploration"
+author: "Shivalika Chavan"
+date: "2025-11-10"
+output: github_document
+---
+
+```{r setup, include=FALSE}
+library(tidyverse)
+library(haven)
+```
+
+## Reading Couture Data (from STATA)
+```{r}
+couture_data <- read_dta("../data/couture_et_al_2024_data_code/brfss17_20.dta") |> 
+  select(-`_ageg5yr`, -`_age80`) |> 
+  janitor::clean_names() |>
+  mutate(
+    date = as.Date(paste(iyear, imonth, iday, sep = "-")),
+    general_health =
+      case_match(
+        genhlth,
+        1 ~ "Excellent",
+        2 ~ "Very Good",
+        3 ~ "Good",
+        4 ~ "Fair",
+        5 ~ "Poor",
+        .default = NA),
+    general_health = as.factor(general_health),
+    physical_health =
+      case_match(
+        physhlth,
+        88 ~ 0,
+        77 ~ NA,
+        99 ~ NA,
+        .default = physhlth),
+    mental_health =
+      case_match(
+        menthlth,
+        88 ~ 0,
+        77 ~ NA,
+        99 ~ NA,
+        .default = menthlth),
+    sex =
+      case_match(
+        sex,
+        1 ~ "Male",
+        2 ~ "Female",
+        .default = NA),
+    sex = as.factor(sex),
+    marital_status =
+      case_match(
+        marital,
+        1 ~ "Married",
+        2 ~ "Divorced",
+        3 ~ "Widowed",
+        4 ~ "Separated",
+        5 ~ "Never Married",
+        6 ~ "Member of an unmarried couple (Partner)", 
+        .default = NA),
+    marital_status = as.factor(marital_status),
+    education_status =
+      case_match(
+        educa,
+        1 ~ "Less than High School", 
+        2 ~ "Elementary",           
+        3 ~ "Some High School",
+        4 ~ "High School Graduate/GED",
+        5 ~ "Some College/Tech School",
+        6 ~ "College Graduate",
+        .default = NA),
+    education_status = as.factor(education_status),
+    children =
+      case_match(
+        children,
+        88 ~ 0,
+        99 ~ NA,
+        .default = children),
+    age_group_5yr =
+      case_match(
+        ageg5yr,
+        14 ~ NA,
+        .default = ageg5yr),
+    age_group_5yr = as.factor(age_group_5yr),
+    employment_status =
+      case_match(
+        employ1,
+        1 ~ "Employed for wages",
+        2 ~ "Self-employed",
+        3 ~ "Out of work (<1 year)",
+        4 ~ "Out of work (>1 year)",
+        5 ~ "Homemaker",
+        6 ~ "Student",
+        7 ~ "Retired",
+        8 ~ "Unable to work (Disabled)",
+        .default = NA),
+    employment_status = as.factor(employment_status),
+    income =
+      case_match(
+        income2,
+        9 ~ NA, 
+        .default = income2),
+    income = as.factor(income),
+    race =
+      case_match(
+        imprace,
+        1 ~ "White, Non-Hispanic",
+        2 ~ "Black, Non-Hispanic",
+        3 ~ "Asian, Non-Hispanic",
+        4 ~ "American Indian, Alaska Native, Non-Hispanic",
+        5 ~ "Hispanic",
+        6 ~ "Other/Multiracial, Non-Hispanic",
+        .default = NA),
+    race = as.factor(race)
+  )
+```
+
+
+**Coding Variables from BRFSS:**
+
+  * General Health: 1 - Excellent, 2 - Very Good, 3 - Good, 4 - Fair, 5 - Poor, 7 - Don't Know, Not Sure, 9 - Refused
+  * Mental/Physical Health Days: 0-30 - Actual number of days poor health was experienced, 77 - Don't Know, Not Sure, 88 - None (Recoded to 0), 99 - Refused
+  * Sex: 1 - Male, 2 - Female, 7 - Don't Know, Not Sure, 9 - Refused
+  * Marital: 1 - Married, 2 - Divorced, 3 - Widowed, 4 - Separated, 5 - Never Married, 6 - Member of an unmarried couple (Partner), 9 - Refused
+  * Education: 1 - Never attended school or only kindergarten, 2 - Grades 1 through 8 (Elementary), 3 - Grades 9 through 11 (Some High School), 4 - Grade 12 or GED (High School Graduate), 5 - College 1 year to 3 years (Some College), 6 - College 4 years or more (College Graduate), 9 - Don't Know, Not Sure, Refused
+  * Children: Actual # of children, 88 - None (Recoded to 0), 99 - Refused
+  * ageg5yr: age category by 5 years
+  * age80: actual age
+  * State: State FIPS
+  * Employment: 1 - Employed for wages, 2 - Self-employed, 3 - Out of work for less than 1 year, 4 - Out of work for 1 year or more, 5 - Homemaker, 6 - Student, 7 - Retired, 8 - Unable to work (Disabled), 9 - Refused
+  * Income: 1 - Less than $10,000, 2 - $10,000 to less than $15,000, 3 - $15,000 to less than $20,000, 4 - $20,000 to less than $25,000, 5 - $25,000 to less than $35,000, 6 - $35,000 to less than $50,000, 7 - $50,000 to less than $75,000, 8 - $75,000 or more, 9 - Don't Know, Not Sure, Refused
+  * Race: 1 - White, Non-Hispanic, 2 - Black, Non-Hispanic, 3 - Asian, Non-Hispanic, 4 - American Indian, Alaska Native, Non-Hispanic, 5 - Hispanic, 6 - Other, Multiracial, Non-Hispanic, 9 - Not Sure, Refused
+
+```{r}
+summary(couture_data) |> knitr::kable()
+```
+
