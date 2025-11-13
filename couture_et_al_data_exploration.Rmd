@@ -10,8 +10,7 @@ library(tidyverse)
 library(haven)
 ```
 
-## Reading Data (from STATA)
-
+## Reading Couture Data (from STATA)
 ```{r}
 couture_data <- read_dta("./data/couture_et_al_2024_data_code/brfss17_20.dta") |> 
   select(-`_ageg5yr`, -`_age80`) |> 
