@@ -5,7 +5,7 @@ sports betting exploration
 ## Look at total handle
 
 ``` r
-sb_rev_month_df = read_csv('./data/legal_sports_report/sb_rev_by_month.csv')
+sb_rev_month_df = read_csv('../data/legal_sports_report/sb_rev_by_month.csv')
 ```
 
     ## Rows: 87 Columns: 5
@@ -18,7 +18,7 @@ sb_rev_month_df = read_csv('./data/legal_sports_report/sb_rev_by_month.csv')
     ## ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
 
 ``` r
-state_legal_df = read_csv('./data/legal_sports_report/state_legalization_dates.csv')
+state_legal_df = read_csv('../data/legal_sports_report/state_legalization_dates.csv')
 ```
 
     ## Rows: 36 Columns: 6

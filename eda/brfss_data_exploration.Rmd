@@ -14,7 +14,7 @@ This document takes an initial look at the BRFSS data so we can understand what 
 
 ## Reading BRFSS Raw Data (from XTP)
 ```{r}
-brfss_2024_data_raw <- read_xpt("./data/raw_data/brfss/LLCP2024.XPT") |> 
+brfss_2024_data_raw <- read_xpt("../data/raw_data/brfss/LLCP2024.XPT") |> 
   janitor::clean_names()
 colnames(brfss_2024_data_raw)
 ```

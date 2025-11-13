@@ -8,22 +8,22 @@ output: github_document
 ```{r setup, include=FALSE}
 library(tidyverse)
 library(haven)
-source("./source/clean_brfss_data.R")
-source("./source/standardize_brfss_variable.R")
+source("../source/clean_brfss_data.R")
+source("../source/standardize_brfss_variable.R")
 ```
 
 I've written `clean_brfss_data.R` (essentially converting what was done in the initial data exploration to a function) and `standardize_brfss_variable.R`. Some variable names have changes over the years, though they ask the same question and they are coded the same way. For example `hlthpl2` in 2024 and `hlthpl1` in 2023 answer the same question:  Adults who had some form of health insurance and are both coded as 1 = Yes, 2 = No, 9 = don't know/refused/missing. 
 
 Importing the raw files one at a time. Takes a while so I only want to do this once per session. Commented out so knitting isn't slow. 
 ```{r}
-# brfss_2024_data_raw = read_xpt("./data/raw_data/brfss/LLCP2024.XPT") |> janitor::clean_names()
-# brfss_2023_data_raw = read_xpt("./data/raw_data/brfss/LLCP2023.XPT") |> janitor::clean_names()
-# brfss_2022_data_raw = read_xpt("./data/raw_data/brfss/LLCP2022.XPT") |> janitor::clean_names()
-# brfss_2021_data_raw = read_xpt("./data/raw_data/brfss/LLCP2021.XPT") |> janitor::clean_names()
-# brfss_2020_data_raw = read_xpt("./data/raw_data/brfss/LLCP2020.XPT") |> janitor::clean_names()
-# brfss_2019_data_raw = read_xpt("./data/raw_data/brfss/LLCP2019.XPT") |> janitor::clean_names()
-# brfss_2018_data_raw = read_xpt("./data/raw_data/brfss/LLCP2018.XPT") |> janitor::clean_names()
-# brfss_2017_data_raw = read_xpt("./data/raw_data/brfss/LLCP2017.XPT") |> janitor::clean_names()
+# brfss_2024_data_raw = read_xpt("../data/raw_data/brfss/LLCP2024.XPT") |> janitor::clean_names()
+# brfss_2023_data_raw = read_xpt("../data/raw_data/brfss/LLCP2023.XPT") |> janitor::clean_names()
+# brfss_2022_data_raw = read_xpt("../data/raw_data/brfss/LLCP2022.XPT") |> janitor::clean_names()
+# brfss_2021_data_raw = read_xpt("../data/raw_data/brfss/LLCP2021.XPT") |> janitor::clean_names()
+# brfss_2020_data_raw = read_xpt("../data/raw_data/brfss/LLCP2020.XPT") |> janitor::clean_names()
+# brfss_2019_data_raw = read_xpt("../data/raw_data/brfss/LLCP2019.XPT") |> janitor::clean_names()
+# brfss_2018_data_raw = read_xpt("../data/raw_data/brfss/LLCP2018.XPT") |> janitor::clean_names()
+# brfss_2017_data_raw = read_xpt("../data/raw_data/brfss/LLCP2017.XPT") |> janitor::clean_names()
 ```
 
 Testing the sequence of functions for cleaning/standardizing. Will re-test each one when changes are made. Commented out so knitting isn't slow. 
@@ -51,7 +51,7 @@ read_standardize_clean = function(datayear, filepath) {
 }
 
 data_years = 2017:2024
-filepaths <- paste0("./data/raw_data/brfss/LLCP", data_years, ".XPT")
+filepaths <- paste0("../data/raw_data/brfss/LLCP", data_years, ".XPT")
 
 data = 
   tibble(
@@ -61,7 +61,7 @@ data =
   ) |> 
   select(cleaned_dfs) |> 
   unnest(cols = c(cleaned_dfs)) |> 
-  write_csv("./data/brfss_clean_2017_2024.csv")
+  write_csv("../data/brfss_clean_2017_2024.csv")
 ```
 
 Summarizing the changes made:

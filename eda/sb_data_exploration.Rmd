@@ -27,8 +27,8 @@ scale_fill_discrete = scale_fill_viridis_d
 ## Look at total handle
 
 ```{r}
-sb_rev_month_df = read_csv('./data/legal_sports_report/sb_rev_by_month.csv')
-state_legal_df = read_csv('./data/legal_sports_report/state_legalization_dates.csv')
+sb_rev_month_df = read_csv('../data/legal_sports_report/sb_rev_by_month.csv')
+state_legal_df = read_csv('../data/legal_sports_report/state_legalization_dates.csv')
 
 get_n_states_legal = function(input_month) {
   n_states_legal = nrow(filter(state_legal_df, first_start <= input_month))
