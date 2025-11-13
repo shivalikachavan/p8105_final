@@ -1,13 +1,13 @@
-clean_brfss_data = function(brfss_data_raw, year = 2024){
+clean_brfss_data = function(brfss_data_raw, data_year = 2024){
   
-  
+  column_names = colnames(brfss_data_raw)
   
   brfss_data_clean = 
     brfss_data_raw |> 
     select(qstver, dispcode, state, seqno, iyear, imonth, iday, 
-           sexvar, marital, educag, employ1, children, incomg1, urbstat, imprace, ageg5yr, hlthpl_standard, 
-           genhlth, rfhlth, physhlth, phys14d, menthlth, ment14d, poorhlth, medcost1, totinda, michd, addepev3, 
-           decide, diffalon, lsatisfy, emtsuprt,  sdlonely, sdhemply, sdhbills, sdhutils, rfbing6, rfdrh_standard
+           sex, marital, educag, employ1, children, income_standard, urbstat, imprace, ageg5yr, hlthpl_standard, 
+           genhlth, rfhlth, physhlth, phys14d, menthlth, ment14d, poorhlth, medcost_standard, totinda, michd, addepe_standard, 
+           decide, diffalon, lsatisfy, emtsuprt, sdlonely, sdhemply, sdhbills, sdhutils, rfbing_standard, rfdrh_standard
     ) |> 
     filter(dispcode == 1100) |> # only selecting completed interviews
     mutate(
@@ -16,7 +16,7 @@ clean_brfss_data = function(brfss_data_raw, year = 2024){
       
       date = as.Date(paste(iyear, imonth, iday, sep = "-")),
       
-      sex = case_match(sexvar, 1 ~ "Male", 2 ~ "Female", .default = NA) |> as.factor(),
+      sex = case_match(sex, 1 ~ "Male", 2 ~ "Female", .default = NA) |> as.factor(),
       
       marital_status =
         case_match(
@@ -55,14 +55,15 @@ clean_brfss_data = function(brfss_data_raw, year = 2024){
       
       income_level =
         case_match(
-          incomg1,
-          1 ~ "Less than $15,000",
-          2 ~ "$15,000 to < $25,000",
-          3 ~ "$25,000 to < $50,000",
-          4 ~ "$50,000 to < $75,000",
-          5 ~ "$50,000 to < $100,000",
-          6 ~ "$100,000 to < $200,000",
-          7 ~ "$200,000 or more",
+          income_standard,
+          1 ~ "Less than $10,000",
+          2 ~ "$10,000 to < $15,000",
+          3 ~ "$15,000 to < $20,000",
+          4 ~ "$20,000 to < $25,000",
+          5 ~ "$25,000 to < $35,000",
+          6 ~ "$35,000 to < $50,000",
+          7 ~ "$50,000 to < $75,000",
+          c(8, 9, 10, 11) ~ "$75,000 or more",
           .default = NA 
         ) |> as.factor(),
       
@@ -135,17 +136,17 @@ clean_brfss_data = function(brfss_data_raw, year = 2024){
       mental_health = case_match(menthlth, 88 ~ 0, 77 ~ NA, 99 ~ NA, .default = menthlth),
       mental_health_not_good_days = case_match(ment14d, 1 ~ "0", 2 ~ "1-13", 3 ~ "14+", 9 ~ NA, .default = NA) |> as.factor(),
       
-      depressive_disorder = case_match(addepev3, 1 ~ "Yes", 2 ~ "No", .default = NA) |> as.factor(),
+      depressive_disorder = case_match(addepe_standard, 1 ~ "Yes", 2 ~ "No", .default = NA) |> as.factor(),
       
       poor_health = case_match(poorhlth, 88 ~ 0, 77 ~ NA, 99 ~ NA, .default = poorhlth),
       
-      binge_drink = case_match(rfbing6, 1 ~ "No", 2 ~ "Yes", 9 ~ NA, .default = NA) |> as.factor(),
+      binge_drink = case_match(rfbing_standard, 1 ~ "No", 2 ~ "Yes", 9 ~ NA, .default = NA) |> as.factor(),
       heavy_drink = case_match(rfdrh_standard, 1 ~ "No", 2 ~ "Yes", 9 ~ NA, .default = NA) |> as.factor(),
       
-      medical_cost_barrier = case_match(medcost1, 1 ~ "Yes", 2 ~ "No", 7 ~ NA, 9 ~ NA, .default = NA) |> as.factor(),
+      medical_cost_barrier = case_match(medcost_standard, 1 ~ "Yes", 2 ~ "No", 7 ~ NA, 9 ~ NA, .default = NA) |> as.factor(),
       
       difficulty_self_care = case_match(diffalon, 1 ~ "Yes", 2 ~ "No", .default = NA) |> as.factor(),
-      
+
       life_satisfaction =
         case_match(
           lsatisfy,
@@ -153,9 +154,10 @@ clean_brfss_data = function(brfss_data_raw, year = 2024){
           2 ~ "Satisfied",
           3 ~ "Dissatisfied",
           4 ~ "Very dissatisfied",
-          .default = NA) |> as.factor(),
+          .default = NA_character_
+          ) |> as.factor(),
       
-      emotional_support =
+      emotional_support = 
         case_match(
           emtsuprt,
           1 ~ "Always",
@@ -163,7 +165,8 @@ clean_brfss_data = function(brfss_data_raw, year = 2024){
           3 ~ "Sometimes",
           4 ~ "Rarely",
           5 ~ "Never",
-          .default = NA) |> as.factor(),
+          .default = NA_character_
+        ) |> as.factor(),
       
       loneliness =
         case_match(
@@ -173,7 +176,8 @@ clean_brfss_data = function(brfss_data_raw, year = 2024){
           3 ~ "Sometimes",
           4 ~ "Rarely",
           5 ~ "Never",
-          .default = NA) |> as.factor(),
+          .default = NA_character_
+        ) |> as.factor(),
       
       lost_reduced_employment = case_match(sdhemply, 1 ~ "Yes", 2 ~ "No", .default = NA) |> as.factor(),
       
