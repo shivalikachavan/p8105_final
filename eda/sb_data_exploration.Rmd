@@ -56,4 +56,70 @@ sb_rev_month_df |>
 ```
 
 
+## Look at total handle by state
+
+```{r}
+library(scales)
+
+sb_rev_by_state_month = read_csv('data/legal_sports_report/sb_rev_by_state_month.csv')
+
+#group by state and summing handles
+handle_by_state = sb_rev_by_state_month |> 
+  group_by(state) |> 
+  summarise(total_handle = sum(handle, na.rm = TRUE))
+
+
+handle_by_state |> 
+  ggplot(aes(x = total_handle, y = reorder(state, total_handle))) +
+  geom_bar(stat = "identity", fill = "lightblue") +
+  scale_x_continuous(labels = comma) +
+  labs(
+    title = "Total Handle by State",
+    x = "Total Handle",
+    y = "State"
+  ) +
+  theme_minimal()
+  
+```
+
+
+
+## Look at monthly handle for top 5 states
+
+```{r}
+#pulling top 5 states
+top_states = handle_by_state |> 
+  arrange(desc(total_handle)) |> 
+  head(5) |> 
+  pull(state)
+
+top_monthly_handle =
+  sb_rev_by_state_month |> 
+  filter(state %in% top_states)
+
+top_monthly_handle |> 
+  ggplot(aes(x = month, y = handle, color = state)) +
+  geom_line(linewidth = 0.7) +
+  labs(
+    title = "Monthly Handle for Top 5 States",
+    x = "Month",
+    y = "Handle",
+    color = "State"
+  ) +
+  theme_minimal()
+
+  
+```
+
+
+
+
+
+
+
+
+
+
+
+
 
