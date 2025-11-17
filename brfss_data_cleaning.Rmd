@@ -1,0 +1,75 @@
+---
+title: "brfss_data_cleaning.Rmd"
+author: "Shivalika Chavan"
+date: "2025-11-13"
+output: github_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(haven)
+library(here)
+source("./source/filter_brfss_data.R")
+source("./source/standardize_brfss_variable.R")
+source("./source/load_clean_brfss.R")
+```
+
+I've written `filter_brfss_data.R` (essentially converting what was done in the initial data exploration to a function) and `standardize_brfss_variable.R`. Some variable names have changes over the years, though they ask the same question and they are coded the same way. For example `hlthpl2` in 2024 and `hlthpl1` in 2023 answer the same question:  Adults who had some form of health insurance and are both coded as 1 = Yes, 2 = No, 9 = don't know/refused/missing. 
+
+#### Reading, Standardizing, and Filtering the BRFSS Data from 2017 to 2024
+```{r}
+read_standardize_clean = function(datayear, filepath) {
+  
+  print(datayear)
+  
+  cleaned_data = 
+    read_xpt(filepath) |> 
+    janitor::clean_names() |> 
+    standardize_brfss_variable() |> 
+    filter_brfss_data(data_year = datayear)
+  
+  cleaned_data
+}
+
+data_years = 2017:2024
+filepaths <- paste0("./data/raw_data/brfss/LLCP", data_years, ".XPT")
+
+data = 
+  tibble(
+    data_year = data_years,
+    filepath = filepaths,
+    cleaned_dfs = map2(data_year, filepath, read_standardize_clean)
+  ) |> 
+  select(cleaned_dfs) |> 
+  unnest(cols = c(cleaned_dfs)) 
+
+data |> write_csv("./data/brfss_clean_2017_2024.csv") # has some duplicate variables, handled in load/clean step
+```
+
+Summarizing the changes made:
+
+  * `hlthpl_standard` handles different versions of the question: Adults who had some form of health insurance. `hlthpl1` was used until 2023. Starting in 2024, `hlthpl2` was used.
+  * `rfdrh_standard` handles the different response variable for "Heavy drinkers (adult men having more than 14 drinks per week and adult women having more than 7 drinks per week)." There are several versions of this over the years. 
+  * `rfbing_standard` handles the different response variable for "Binge drinkers (males having five or more drinks on one occasion, females having four or more drinks on one occasion)" There are several versions of this over the years. 
+  * `medcost_standard` handles the different response variable for "Was there a time in the past 12 months when you needed to see a doctor but could not because you could not afford it?" There are several versions of this over the years. 
+  * `addepe_standard` handles the different response variable for " (Ever told) (you had) a depressive disorder (including depression, major depression, dysthymia, or minor depression)?" There are several versions of this over the years. 
+  * `sdlonely` is variable to track responses to "How often do you feel lonely?" which was only included in 2023 and 2024.
+  * `lsatisfy` is variable to track responses to "In general, how satisfied are you with your life?" which was only included starting in 2023. 
+  * `emtsuprt` is variable to track responses to "How often do you get the social and emotional support you need?" which was only included starting in 2023. 
+  * `sdhemply` is variable to track responses to "In the past 12 months have you lost employment or had hours reduced?" which was only included starting in 2022. 
+  * `sdhbills` is variable to track responses to "During the last 12 months, was there a time when you were not able to pay your mortgage, rent or utility bills?" which was only included starting in 2022. 
+  * `sdhutils` is variable to track responses to "During the last 12 months was there a time when an electric, gas, oil, or water company threatened to shut off services?" which was only included starting in 2022. 
+  * `medcost1` is variable to track responses to  which was only included starting in 2021. 
+  * `sex1` renamed to `sex` for years before 2019.
+  * `urbstat` was not asked in 2017. 
+
+#### Command for loading the saved csv into a clean, factored format
+```{r}
+cleaned_data = load_clean_brfss("./data/brfss_clean_2017_2024.csv") # command to load the cleaned csv
+cleaned_data
+```
+
+  
+  
+  
