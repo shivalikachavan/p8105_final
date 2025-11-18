@@ -1,5 +1,10 @@
 load_clean_brfss = function(filepath){
   
+  #get date when sports betting became legal by state
+  sb_legal_dates = 
+    read_csv("./data/legal_sports_report/state_legalization_dates.csv") |> 
+    select(first_start, abbr, fips)
+  
   cleaned_df = 
     read_csv(filepath) |> 
     mutate(
@@ -173,6 +178,14 @@ load_clean_brfss = function(filepath){
       
       financial_strain_bills = case_match(sdhbills, 1 ~ "Yes", 2 ~ "No", .default = NA) |> as.factor(),
       financial_strain_utilities = case_match(sdhbills, 1 ~ "Yes", 2 ~ "No", .default = NA) |> as.factor()
+    ) |>
+    
+    #add in whether sports betting was legal at the time of the interview
+    #NOTE: legalization dates are set to the first of the month so we will check that the interview was the following month (not day) by temporarily creating a new column month_of_interview
+    merge(sb_legal_dates, by.x = "state", by.y = "fips", all = TRUE) |> 
+    mutate(
+      month_of_interview = floor_date(date, unit = "month"),
+      sb_legal = (as.numeric(month_of_interview > first_start))
     ) |> 
     # dropping any overwritten variables
     select( 
@@ -185,8 +198,12 @@ load_clean_brfss = function(filepath){
         physical_health, physical_health_not_good_days, leisure_physical_activity_last_30_days,
         mental_health, mental_health_not_good_days, poor_health, depressive_disorder, difficulty_self_care,
         life_satisfaction, emotional_support, loneliness,
-        lost_reduced_employment, financial_strain_bills, financial_strain_utilities
+        binge_drink, heavy_drink,
+        lost_reduced_employment, financial_strain_bills, financial_strain_utilities,
+        #Sports Betting Legal
+        sb_legal
       ) 
+  
   
   cleaned_df
 }
