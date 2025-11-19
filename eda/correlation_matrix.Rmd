@@ -2,7 +2,7 @@
 title: "correlation_matrix"
 author: "Angelica Bailey"
 date: "2025-11-19"
-output: html_document
+output: github_document
 ---
 
 Identifying relationships between several variables in the dataset with correlation matrix, summarizing the strength and direction of the relationship between pair of variables.
