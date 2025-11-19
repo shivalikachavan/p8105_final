@@ -34,3 +34,6 @@ The House Always Wins? Exploring the Societal Costs of Legal Sports Gambling
 > [!WARNING]
 > We will probably need to account for COVID by looking at data before 2020 (and potentially after 2021?)
 
+## Questions for TA:
+1. Is our data pipeline ok?
+   * download zipped xpt files -> unzip in directory -> concatenate across desired variables -> save raw csv as zip -> load csv with factors in R
