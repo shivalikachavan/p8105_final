@@ -5,7 +5,7 @@ The House Always Wins? Exploring the Societal Costs of Legal Sports Gambling
 ## EDA
 1. Sports handle across states
    * [ ] stratify online vs retail (J)
-   * [ ] spikes in handle -> what corresponding sports season (S)
+   * [X] spikes in handle -> what corresponding sports season (S)
    * [ ] chloropleth -> states total handle by year (J)
 
 > [!IMPORTANT]
