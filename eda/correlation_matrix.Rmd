@@ -1,5 +1,5 @@
 ---
-title: "correlation_matrix"
+title: "Correlation Matrix"
 author: "Angelica Bailey"
 date: "2025-11-19"
 output: github_document
@@ -13,26 +13,35 @@ Loading libraries
 library(tidyverse)
 library(ggcorrplot)
 library(patchwork)
-source("./source/load_clean_brfss.R")
+source(here::here("source", "load_clean_brfss.R"))
 ```
 
 
 Loading in data
 ```{r}
-brfss_data = load_clean_brfss("data/brfss_clean_2017_2024.csv")
+brfss_data = load_clean_brfss(here::here("data", "brfss_clean_2017_2024.csv"))
 ```
 
 
 Testing correlation
 ```{r}
 #selecting variables 
-correlation_vars = c("general_health_refactored", "physical_health_not_good_days","mental_health_not_good_days", "education_status", "income_level", "depressive_disorder", "life_satisfaction", "loneliness", "emotional_support")
 
+correlation_vars = c("general_health","general_health_refactored", 
+                     "mental_health", "mental_health_not_good_days",
+                     "physical_health", "physical_health_not_good_days",
+                     "poor_health", "depressive_disorder",
+                     "difficulty_self_care", "michd",
+                     "binge_drink", "heavy_drink", 
+                     "leisure_physical_activity_last_30_days")
+
+                          
 
 #stratifying datasets by sex
+
 brfss_males = brfss_data |>
   filter(sex == "Male") |>
-  select(correlation_vars) |> 
+  select(all_of(correlation_vars)) |> 
   mutate_all(as.numeric)
 
 brfss_females = brfss_data |>
@@ -41,52 +50,63 @@ brfss_females = brfss_data |>
   mutate_all(as.numeric)
 
 
-#creating matrices 
+#creating matrices and visualizing side by side
+
 corr_males = 
   cor(brfss_males, 
       method = "spearman",
-      use = "pairwise.complete.obs")
-
+      use = "pairwise.complete.obs") |> 
+  ggcorrplot(
+    type = "upper",  
+    method = "square", 
+    lab = TRUE,               
+    lab_size = 3, 
+    title = "Correlations: males") +
+  theme(plot.title = element_text(hjust = 0.5))
+  
 corr_females =
   cor(brfss_females,
       method = "spearman",
-      use = "pairwise.complete.obs")
-
-```
-
-
-Visualizing matrices side by side
-
-```{r}
-#male matrix
-male_plot = ggcorrplot(
-  corr_males,
-  type = "upper",            
-  method = "square",         
-  lab = TRUE,            #display coefficient values    
-  lab_size = 3,              
-  title = "Correlations: males") +
-  theme(plot.title = element_text(hjust = 0.5)) #centering title
-
-#females matrix
-female_plot = ggcorrplot(
-  corr_females, 
-  type = "upper",
-  method = "square",
-  lab = TRUE,    
-  lab_size = 3,
-  title = "Correlations: females") +
+      use = "pairwise.complete.obs") |> 
+  ggcorrplot(
+    type = "upper",
+    method = "square",
+    lab = TRUE,
+    lab_size = 3,
+    title = "Correlations: females") +
   theme(plot.title = element_text(hjust = 0.5))
 
-male_plot + female_plot
+corr_males + corr_females
+  
+```
+
+
+
+Creating non stratified matrix
+```{r}
+brfss_all = brfss_data |> 
+  select(all_of(correlation_vars)) |> 
+  mutate_all(as.numeric)
+
+corr = 
+  cor(brfss_all, 
+      method = "spearman",
+      use = "pairwise.complete.obs") |> 
+  ggcorrplot(
+    type = "upper",
+    method = "square",
+    lab = TRUE,
+    lab_size = 3,
+    title = "Correlations",
+    theme(plot.title = element_text(hjust = 0.5))
+  )
+
+#to remove grid lines: theme(panel.grid.major = element_blank())
 
 ```
 
-Next steps:
-- create non-stratified correlation matrix since correlatio between female and male groups do not differ significantly 
-- add age group and marital status variables
 
-*Since education status has little correlation with other outcome variables, we can use for future analysis as predictor variable. 
+**Since education status has little correlation with other outcome variables, we can use it for future analysis as a predictor variable.**
 
 
 
