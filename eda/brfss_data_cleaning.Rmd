@@ -9,10 +9,10 @@ output: github_document
 knitr::opts_chunk$set(echo = TRUE)
 library(tidyverse)
 library(haven)
-library(here)
-source("./source/filter_brfss_data.R")
-source("./source/standardize_brfss_variable.R")
-source("./source/load_clean_brfss.R")
+
+source(here::here("source", "filter_brfss_data.R"))
+source(here::here("source", "standardize_brfss_variable.R"))
+source(here::here("source", "load_clean_brfss.R"))
 ```
 
 I've written `filter_brfss_data.R` (essentially converting what was done in the initial data exploration to a function) and `standardize_brfss_variable.R`. Some variable names have changes over the years, though they ask the same question and they are coded the same way. For example `hlthpl2` in 2024 and `hlthpl1` in 2023 answer the same question:  Adults who had some form of health insurance and are both coded as 1 = Yes, 2 = No, 9 = don't know/refused/missing. 
@@ -33,7 +33,7 @@ read_standardize_clean = function(datayear, filepath) {
 }
 
 data_years = 2017:2024
-filepaths <- paste0("./data/raw_data/brfss/LLCP", data_years, ".XPT")
+filepaths <- here::here("data", "raw_data", "brfss", paste0("LLCP", data_years, ".XPT"))
 
 data = 
   tibble(
@@ -44,7 +44,8 @@ data =
   select(cleaned_dfs) |> 
   unnest(cols = c(cleaned_dfs)) 
 
-data |> write_csv("./data/brfss_clean_2017_2024.csv") # has some duplicate variables, handled in load/clean step
+data |> write_csv(here::here("data", "brfss_clean_2017_2024.csv")) # has some duplicate variables, handled in load/clean step
+
 ```
 
 Summarizing the changes made:
@@ -66,7 +67,8 @@ Summarizing the changes made:
 
 #### Command for loading the saved csv into a clean, factored format
 ```{r}
-cleaned_data = load_clean_brfss("./data/brfss_clean_2017_2024.csv") # command to load the cleaned csv
+
+cleaned_data = load_clean_brfss(here::here("data", "brfss_clean_2017_2024.csv")) # command to load the cleaned csv
 cleaned_data
 ```
 
