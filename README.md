@@ -12,7 +12,7 @@ The House Always Wins? Exploring the Societal Costs of Legal Sports Gambling
 > $ values are not inflation adjusted
   
 2. BRFSS
-   * [ ] confirm outcome variables available across years (S)
+   * [X] confirm outcome variables available across years (S)
    * [ ] correlation matix -> identify colinearity -> stratigy by sex (A)
    * [ ] demographics -> age/sex -> do they match national demographics, is a scaling factor necessary? <br>
          * urban/rural, marital status (children in household), education status, income level, employment status <br>
