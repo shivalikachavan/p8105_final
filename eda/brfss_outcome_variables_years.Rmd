@@ -13,7 +13,11 @@ brfss_data = load_clean_brfss(here::here("data", "brfss_clean_2017_2024.csv"))
 ```
 
 ```{r}
-outcome_vars = c("general_health_refactored", "physical_health_not_good_days","mental_health_not_good_days", "education_status", "income_level", "depressive_disorder", "life_satisfaction", "loneliness")
+outcome_vars = c("general_health", "general_health_refactored", "michd",
+                 "physical_health", "physical_health_not_good_days", "leisure_physical_activity_last_30_days",
+                 "mental_health", "mental_health_not_good_days", "poor_health", "depressive_disorder",
+                 "difficulty_self_care", "life_satisfaction", "emotional_support", "loneliness", "binge_drink",
+                 "heavy_drink", "lost_reduced_employment", "financial_strain_bills", "financial_strain_utilities")
 
 summarize_outcome_by_year = function(outcome_var, df = brfss_data) {
   
@@ -21,23 +25,53 @@ summarize_outcome_by_year = function(outcome_var, df = brfss_data) {
   
   df |> 
     group_by(year(date), !!outcome_sym) |> 
-    summarize(n = n()) |> 
-    ungroup() |> 
+    summarize(n = n(), .groups = "drop") |> 
     pivot_wider(
-      names_from = !!outcome_sym, 
+      names_from = `year(date)`, 
       values_from = n
-    ) |>
-    rename(year = `year(date)`)
+    )
+}
+
+find_complete_years = function(outcome_var, summary_df){
+  
+  outcome_sym = rlang::sym(outcome_var) 
+  
+  summary_df |> 
+    filter(!is.na(!!outcome_sym)) |> 
+    summarize(
+      across(
+        .cols = everything(),
+        .fns = ~ !all(is.na(.x)) 
+        )
+      )|>
+    select(-!!outcome_sym) |> 
+    pivot_longer(
+      cols = everything(),
+      names_to = "year",
+      values_to = "is_complete"
+      ) |> 
+    summarize(
+      n_complete_years = sum(is_complete)
+      ) |> 
+    pull(n_complete_years)
+    
 }
 
 summary_by_year = tibble(
   outcome = outcome_vars,
-  summary = map(outcome_vars, summarize_outcome_by_year)
-  ) 
+  summary = map(outcome_vars, summarize_outcome_by_year),
+  n_complete_years = map2(outcome_vars, summary, find_complete_years)
+  ) |> 
+  arrange(n_complete_years)
 
-for(outcome_var in summary_by_year) {
-  print(outcome_var)
-}
+summary_by_year
 
+summary_by_year |> 
+  filter(
+    n_complete_years == 8
+  ) |> 
+  pull(outcome)
 ```
+This last set of health outcomes have data for every year, so we can use them in a time series analysis with sports legalization. 
+
 
