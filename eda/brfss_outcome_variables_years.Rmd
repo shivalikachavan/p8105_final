@@ -1,0 +1,43 @@
+---
+title: "EDA: Outcome Variables Years Available"
+author: "Shivalika Chavan"
+date: "2025-11-19"
+output: github_document
+---
+
+Purpose: Identify which years outcome variables are available to use for analysis
+```{r}
+library(tidyverse)
+source(here::here("source", "load_clean_brfss.R"))
+brfss_data = load_clean_brfss(here::here("data", "brfss_clean_2017_2024.csv"))
+```
+
+```{r}
+outcome_vars = c("general_health_refactored", "physical_health_not_good_days","mental_health_not_good_days", "education_status", "income_level", "depressive_disorder", "life_satisfaction", "loneliness")
+
+summarize_outcome_by_year = function(outcome_var, df = brfss_data) {
+  
+  outcome_sym = rlang::sym(outcome_var) 
+  
+  df |> 
+    group_by(year(date), !!outcome_sym) |> 
+    summarize(n = n()) |> 
+    ungroup() |> 
+    pivot_wider(
+      names_from = !!outcome_sym, 
+      values_from = n
+    ) |>
+    rename(year = `year(date)`)
+}
+
+summary_by_year = tibble(
+  outcome = outcome_vars,
+  summary = map(outcome_vars, summarize_outcome_by_year)
+  ) 
+
+for(outcome_var in summary_by_year) {
+  print(outcome_var)
+}
+
+```
+

@@ -2,7 +2,7 @@ load_clean_brfss = function(filepath){
   
   #get date when sports betting became legal by state
   sb_legal_dates = 
-    read_csv("./data/legal_sports_report/state_legalization_dates.csv") |> 
+    read_csv(here::here("data", "legal_sports_report","state_legalization_dates.csv")) |> 
     select(first_start, abbr, fips)
   
   cleaned_df = 
@@ -115,6 +115,7 @@ load_clean_brfss = function(filepath){
           4 ~ "Fair",
           5 ~ "Poor",
           .default = NA) |> as.factor(),
+      
       general_health_refactored =
         case_match(
           rfhlth,
