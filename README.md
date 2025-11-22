@@ -13,7 +13,7 @@ The House Always Wins? Exploring the Societal Costs of Legal Sports Gambling
   
 2. BRFSS
    * [X] confirm outcome variables available across years (S)
-   * [ ] correlation matix -> identify colinearity -> stratigy by sex (A)
+   * [X] correlation matrix -> identify collinearity -> stratify by sex (A)
    * [ ] demographics -> age/sex -> do they match national demographics, is a scaling factor necessary? <br>
          * urban/rural, marital status (children in household), education status, income level, employment status <br>
          * insurance coverage -> financial strain from medical bills and/or utilities <br>
