@@ -5,25 +5,23 @@ date: "2025-11-19"
 output: github_document
 ---
 
-Identifying relationships between several variables in the dataset with correlation matrix, summarizing the strength and direction of the relationship between pair of variables.
+Identifying relationships between health outcome variables in the dataset with correlation matrix.
 
-
-Loading libraries
-```{r}
+```{r setup, include=FALSE}
 library(tidyverse)
 library(ggcorrplot)
 library(patchwork)
 source(here::here("source", "load_clean_brfss.R"))
 ```
 
-
 Loading in data
+
 ```{r}
 brfss_data = load_clean_brfss(here::here("data", "brfss_clean_2017_2024.csv"))
 ```
 
-
 Testing correlation
+
 ```{r}
 #selecting variables 
 
@@ -35,7 +33,6 @@ correlation_vars = c("general_health","general_health_refactored",
                      "binge_drink", "heavy_drink", 
                      "leisure_physical_activity_last_30_days")
 
-                          
 
 #stratifying datasets by sex
 
@@ -75,14 +72,13 @@ corr_females =
     lab_size = 3,
     title = "Correlations: females") +
   theme(plot.title = element_text(hjust = 0.5))
-
-corr_males + corr_females
   
 ```
 
+Correlations between health variables stratified by sex does not show significant difference between males and females.
 
+Creating non stratified correlation matrix:
 
-Creating non stratified matrix
 ```{r}
 brfss_all = brfss_data |> 
   select(all_of(correlation_vars)) |> 
@@ -101,18 +97,15 @@ corr =
     theme(plot.title = element_text(hjust = 0.5))
   )
 
-#to remove grid lines: theme(panel.grid.major = element_blank())
-
+corr
 ```
 
+Comments:
 
-**Since education status has little correlation with other outcome variables, we can use it for future analysis as a predictor variable.**
+-    `mental_health` vs. `mental_health_not_good_days` and `physical_health` vs. `physical_health_not_good_days` are highly correlated (0.99). These are redundant variables.
 
+-   Some variables related to general well-being that show moderate positive correlations: `depressive_disorder` correlates moderately with both `mental_health` and `difficulty_self_care`. Individuals with depressive disorders report more poor mental health days and difficulty taking care of themselves. Additionally, `poor_health` correlates with `physical_health`(0.43) and `difficulty_self_care`(0.40).
 
+-   `heavy_drink` and `binge_drink` have very weak correlations with almost everything else. `michd` shows generally weak correlations with the mental health variables.
 
-
-
-
-
-
-
+-   `general_health_refactored` shows negative correlations with variables like `physical_health` and `mental_health`. As general health gets better (lower score), the number of bad health days goes up (?) This is an unexpected result.
