@@ -16,7 +16,7 @@ source(here::here("source", "load_clean_brfss.R"))
 
 Loading in data
 
-```{r}
+```{r, message=FALSE}
 brfss_data = load_clean_brfss(here::here("data", "brfss_clean_2017_2024.csv"))
 ```
 
@@ -45,8 +45,9 @@ brfss_females = brfss_data |>
   filter(sex == "Female") |>
   select(all_of(correlation_vars)) |> 
   mutate_all(as.numeric)
+```
 
-
+```{r, fig.width=13, fig.height=11}
 #creating matrices and visualizing side by side
 
 corr_males = 
@@ -57,7 +58,8 @@ corr_males =
     type = "upper",  
     method = "square", 
     lab = TRUE,               
-    lab_size = 3, 
+    lab_size = 2.5,
+    tl.cex = 10,
     title = "Correlations: males") +
   theme(plot.title = element_text(hjust = 0.5))
   
@@ -69,13 +71,16 @@ corr_females =
     type = "upper",
     method = "square",
     lab = TRUE,
-    lab_size = 3,
+    lab_size = 2.5,
+    tl.cex = 10,
     title = "Correlations: females") +
   theme(plot.title = element_text(hjust = 0.5))
-  
+
+corr_males + corr_females
 ```
 
 Correlations between health variables stratified by sex does not show significant difference between males and females.
+
 
 Creating non stratified correlation matrix:
 
@@ -84,20 +89,20 @@ brfss_all = brfss_data |>
   select(all_of(correlation_vars)) |> 
   mutate_all(as.numeric)
 
-corr = 
-  cor(brfss_all, 
+cor(brfss_all, 
       method = "spearman",
       use = "pairwise.complete.obs") |> 
   ggcorrplot(
     type = "upper",
     method = "square",
     lab = TRUE,
-    lab_size = 3,
+    lab_size = 2.5,
+    tl.cex = 10,
     title = "Correlations",
     theme(plot.title = element_text(hjust = 0.5))
   )
 
-corr
+
 ```
 
 Comments:

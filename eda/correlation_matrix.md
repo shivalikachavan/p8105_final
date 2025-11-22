@@ -3,34 +3,14 @@ Correlation Matrix
 Angelica Bailey
 2025-11-19
 
-Identifying relationships between several variables in the dataset with
-correlation matrix, summarizing the strength and direction of the
-relationship between pair of variables.
+Identifying relationships between health outcome variables in the
+dataset with correlation matrix.
 
 Loading in data
 
 ``` r
 brfss_data = load_clean_brfss(here::here("data", "brfss_clean_2017_2024.csv"))
 ```
-
-    ## Rows: 36 Columns: 6
-    ## ── Column specification ────────────────────────────────────────────────────────
-    ## Delimiter: ","
-    ## chr  (2): state, abbr
-    ## dbl  (1): fips
-    ## date (3): first_start, online, offline
-    ## 
-    ## ℹ Use `spec()` to retrieve the full column specification for this data.
-    ## ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
-    ## Rows: 2749477 Columns: 39
-    ## ── Column specification ────────────────────────────────────────────────────────
-    ## Delimiter: ","
-    ## chr   (2): imonth, iday
-    ## dbl  (36): qstver, dispcode, state, seqno, iyear, sex, marital, educag, empl...
-    ## date  (1): date
-    ## 
-    ## ℹ Use `spec()` to retrieve the full column specification for this data.
-    ## ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
 
 Testing correlation
 
@@ -57,8 +37,9 @@ brfss_females = brfss_data |>
   filter(sex == "Female") |>
   select(all_of(correlation_vars)) |> 
   mutate_all(as.numeric)
+```
 
-
+``` r
 #creating matrices and visualizing side by side
 
 corr_males = 
@@ -69,7 +50,8 @@ corr_males =
     type = "upper",  
     method = "square", 
     lab = TRUE,               
-    lab_size = 3, 
+    lab_size = 2.5,
+    tl.cex = 10,
     title = "Correlations: males") +
   theme(plot.title = element_text(hjust = 0.5))
   
@@ -81,10 +63,15 @@ corr_females =
     type = "upper",
     method = "square",
     lab = TRUE,
-    lab_size = 3,
+    lab_size = 2.5,
+    tl.cex = 10,
     title = "Correlations: females") +
   theme(plot.title = element_text(hjust = 0.5))
+
+corr_males + corr_females
 ```
+
+![](correlation_matrix_files/figure-gfm/unnamed-chunk-3-1.png)<!-- -->
 
 Correlations between health variables stratified by sex does not show
 significant difference between males and females.
@@ -96,23 +83,21 @@ brfss_all = brfss_data |>
   select(all_of(correlation_vars)) |> 
   mutate_all(as.numeric)
 
-corr = 
-  cor(brfss_all, 
+cor(brfss_all, 
       method = "spearman",
       use = "pairwise.complete.obs") |> 
   ggcorrplot(
     type = "upper",
     method = "square",
     lab = TRUE,
-    lab_size = 3,
+    lab_size = 2.5,
+    tl.cex = 10,
     title = "Correlations",
     theme(plot.title = element_text(hjust = 0.5))
   )
-
-corr
 ```
 
-![](correlation_matrix_files/figure-gfm/unnamed-chunk-3-1.png)<!-- -->
+![](correlation_matrix_files/figure-gfm/unnamed-chunk-4-1.png)<!-- -->
 
 Comments:
 
