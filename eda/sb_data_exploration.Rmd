@@ -1,11 +1,14 @@
 ---
 title: "sports betting exploration"
-output: github_document
+output: html_document
 date: "2025-11-13"
 ---
 
 ```{r setup, include=FALSE}
 library(tidyverse)
+library(ggplot2)
+library(plotly)
+library(colorspace)
 
 knitr::opts_chunk$set(
   fig.width = 6,
@@ -24,28 +27,89 @@ scale_colour_discrete = scale_colour_viridis_d
 scale_fill_discrete = scale_fill_viridis_d
 ```
 
+
+## Get the data
+```{r message=FALSE}
+total_rev_month_df = read_csv('./data/legal_sports_report/sb_rev_by_month.csv')
+state_rev_month_df = read_csv('./data/legal_sports_report/sb_rev_by_state_month.csv')
+state_rev_df = read_csv("./data/legal_sports_report/sb_rev_by_state.csv") 
+state_legal_df = read_csv('./data/legal_sports_report/state_legalization_dates.csv')
+state_fips_df = read_csv("./data/legal_sports_report/state_fips.csv")
+
+state_rev_df = state_rev_df |> 
+  filter(market != "Total") |> 
+  left_join(state_fips_df, join_by(market == state)) |> 
+  left_join(
+    select(state_legal_df, state, first_start, online, offline), 
+    join_by(market == state)) |> 
+  mutate(
+    legal_type = case_when(
+      !is.na(online) & !is.na(offline) ~ "both",
+      !is.na(offline) ~ "offline",
+      !is.na(online) ~"online"
+    )
+  )
+  
+```
+
+## Look at cumulative handle by state
+
+Using Plotly:
+
+```{r}
+state_rev_df = state_rev_df |> 
+  filter(market != "Total") |> 
+  mutate(
+    hover = paste("<b>",market,"</b>", '<br>', 
+                  "Handle: $", format(handle / 1000000000, digits = 2), "B", "<br>", 
+                  "Revenue: $", format(revenue / 100000000, digits = 2), "M", "<br>",
+                  "Hold: ", hold, '%<br>', 
+                  "Taxes: ", format(taxes / 100000000, digits = 2), "M",
+                  "<extra></extra>")
+    )
+                      
+# give state boundaries a white border
+l = list(color = toRGB("white"), width = 2)
+
+# specify some map projection/options
+g = list(
+  scope = 'usa',
+  projection = list(type = 'albers usa'),
+  showlakes = TRUE,
+  lakecolor = toRGB('white')
+)
+
+fig = plot_geo(state_rev_df, locationmode = 'USA-states')
+fig = fig |> 
+  add_trace(
+    z = ~handle, hovertemplate = ~hover, #text = ~hover, 
+    locations = ~abbr,
+    color = ~handle, colorscale="Viridis"
+  ) |> 
+  colorbar(title = "Millions USD") |> 
+  layout(
+    title = 'Cumulative Handle by State<br>(Hover for breakdown)',
+    geo = g
+  )
+
+fig
+```
+
 ## Look at total handle
 
 ```{r}
-sb_rev_month_df = read_csv('../data/legal_sports_report/sb_rev_by_month.csv')
-state_legal_df = read_csv('../data/legal_sports_report/state_legalization_dates.csv')
-
 get_n_states_legal = function(input_month) {
   n_states_legal = nrow(filter(state_legal_df, first_start <= input_month))
 }
 
-sb_rev_month_df = sb_rev_month_df |> 
+total_rev_month_df = total_rev_month_df |> 
   mutate(
     n_states_legal = sapply(month, get_n_states_legal)
   ) 
 
-sb_rev_month_df |> 
-  ggplot(aes(x = month, y=handle)) +
-  geom_line() 
+scale_factor = max(total_rev_month_df$n_states_legal) / max(total_rev_month_df$handle)
 
-scale_factor = max(sb_rev_month_df$n_states_legal) / max(sb_rev_month_df$handle)
-
-sb_rev_month_df |> 
+total_rev_month_df |> 
   ggplot(aes(x = month)) +
   geom_line(aes(y=handle, color="handle")) +
   geom_line(aes(y=n_states_legal / scale_factor, color="legal")) +
@@ -54,6 +118,76 @@ sb_rev_month_df |>
     sec.axis = sec_axis(~ . * scale_factor, name="States Legal")
   )
 ```
+
+Look at handle by state:
+
+```{r}
+#need to fix colorscale
+#palette = grDevices::colors()[grep('gr(a|e)y', grDevices::colors(), invert = T)]
+
+#palette = qualitative_hcl(length(unique(state_rev_month_df$state)), "Dark 3")
+palette = c("#E16A86", "#DE6F73", "#D8755E", "#D17B46", "#C98027", "#BF8600", "#B48C00", "#A79100", "#989600", "#879A00", "#739F00", "#5AA200", "#36A631", "#00A84C", "#00AA63", "#00AC77", "#00AD89", "#00AD9A", "#00ACAA", "#00AAB8", "#00A7C5", "#00A3D0", "#009EDA", "#2997E0", "#6290E5", "#8488E6", "#9E7FE5", "#B377E1", "#C36FDA", "#D069D1", "#D965C6", "#DF63B8", "#E264A9", "#E36698")
+
+
+fig = plot_ly(state_rev_month_df, x = ~month, y = ~handle, color = ~state, colors = palette) 
+fig = fig |> 
+  add_lines()
+
+fig
+```
+
+Look by year 
+
+```{r}
+state_rev_year_df = state_rev_month_df |> 
+  mutate(year = year(month)) %>%  # Extract year
+  group_by(state, year) %>%                   # Group by year
+  summarize(
+    total_handle = sum(handle, na.rm = TRUE),
+  ) 
+
+fig = plot_ly(state_rev_year_df, x = ~year, y = ~total_handle, color = ~state, colors = palette, type = 'bar')
+fig = fig |>  layout(barmode = 'stack')
+
+fig
+```
+
+Look at taxes/revenue:
+
+```{r}
+fig = state_rev_df |> 
+  plot_ly(x = ~taxes, y = ~handle, text = ~market, type = 'scatter', mode = 'markers',
+          color = ~market, colors = palette,
+        marker = list(size = ~hold, opacity = 0.5))
+
+fig = fig |> 
+  layout(title = 'Hold/Handle/Taxes',
+         xaxis = list(showgrid = FALSE),
+         yaxis = list(showgrid = FALSE))
+
+fig
+```
+
+## Timeline of legalization:
+
+```{r}
+fig = state_rev_df |> 
+  plot_ly(x = ~first_start, y = ~taxes, text = ~market, type = 'scatter', mode = 'markers',
+          color = ~legal_type, 
+        marker = list(size = ~hold, opacity = 0.5))
+
+fig = fig |> 
+  layout(title = 'Hold/Handle/Taxes',
+         xaxis = list(showgrid = FALSE),
+         yaxis = list(showgrid = FALSE))
+
+fig
+```
+
+
+
+
+
 
 
 
