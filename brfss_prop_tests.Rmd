@@ -1,0 +1,117 @@
+---
+title: "brfss_prop_tests"
+author: "Shivalika Chavan"
+date: "2025-11-23"
+output: github_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, collapse = TRUE)
+knitr::opts_chunk$set(
+  fig.width = 8,
+  fig.asp = 1,
+  out.width = "90%"
+)
+library(tidyverse)
+source(here::here("source", "load_clean_brfss.R"))
+brfss_data = load_clean_brfss(here::here("data", "brfss_clean_2017_2024.csv"))
+state_fips = read_csv(here::here("data", "legal_sports_report", "state_fips.csv"))
+```
+
+Writing function for running prop test
+```{r}
+run_prop_test_state = function(state_df){
+  
+  counts = 
+    state_df |> 
+    group_by(year = year(date), mental_health_not_good_days) |>
+    summarize(
+      n = n(), 
+      .groups = "drop"
+    ) |> 
+    pivot_wider(
+      names_from = mental_health_not_good_days,
+      values_from = n
+    ) |> 
+    mutate(total_responses = `0` + `1-13` + `14+`) |> 
+    select(`14+`, total_responses)
+  
+  bad_mental_health_14_counts <- counts |> pull(`14+`)
+  total_counts <- counts |> pull(total_responses)
+  
+  if (nrow(counts) < 2) {
+    return(tibble(
+      NA
+    ))
+  }
+  
+  prop_test_result <- prop.test(
+    x = bad_mental_health_14_counts, 
+    n = total_counts, 
+    alternative = "less", 
+    conf.level = 0.95
+  ) 
+  
+  prop_test_result |> 
+    broom::tidy()
+    
+}
+```
+
+Testing function
+```{r}
+brfss_data |> 
+  filter(year(date) %in% c(2017, 2024)) |> 
+  filter(state == 36) |> 
+  run_prop_test_state()
+
+
+brfss_data |> 
+  filter(year(date) %in% c(2017, 2024)) |> 
+  filter(state == 47) |> 
+  run_prop_test_state()
+```
+
+Mapping across all states
+```{r}
+prop_tests_state = 
+  brfss_data |> 
+  filter(year(date) %in% c(2017, 2024)) |>
+  select(state, date, mental_health_not_good_days) |>
+  group_by(state) |>
+  nest() |> 
+  mutate(
+    test_result = map(data, run_prop_test_state)
+  ) |> 
+  select(-data) |> 
+  unnest(cols = c(test_result)) |> 
+  select(state, estimate1, estimate2, p.value, conf.low, conf.high) |> 
+  mutate(
+    significant_increase = p.value < 0.05
+  )
+
+prop_tests_state
+```
+
+```{r}
+plotting_df = 
+  prop_tests_state |> 
+  drop_na(estimate1, estimate2) |>
+  mutate(
+    significant_increase = factor(significant_increase, levels = c(TRUE, FALSE))
+  ) |> 
+  rename(fips = state) |> 
+  left_join(state_fips, by = "fips")
+  
+
+plotting_df |> 
+  ggplot(aes(y = abbr)) + 
+  geom_point(aes(x = estimate1), color = "blue") +
+  geom_point(aes(x = estimate2), color = "red") +
+  geom_segment(aes(x = estimate1, xend = estimate2, color = significant_increase))+
+  xlab("Prop Estimate (2017 vs. 2024)")
+
+```
+
+
+

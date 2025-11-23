@@ -51,3 +51,4 @@ rsconnect/
 
 # BRFSS file
 data/brfss_clean_2017_2024.csv
+data/raw_data/brfss/
