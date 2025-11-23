@@ -90,6 +90,7 @@ state_legal_df = read_csv("./data/raw_data/state_legalization_dates.csv") |>
 state_legal_df[nrow(state_legal_df) + 1,] = list("Kentucky", "Sep-23", "Sep-23", "Sep-23")
 state_legal_df[nrow(state_legal_df) + 1,] = list("Maine", "Nov-23", "Nov-23", "Sep-24")
 state_legal_df[nrow(state_legal_df) + 1,] = list("Vermont", "Jan-24", "Jan-24", NA)
+state_legal_df[nrow(state_legal_df) + 1,] = list("Nebraska", "Jun-23", NA, "Jun-23")
 
 state_legal_df = state_legal_df |> 
   mutate(
