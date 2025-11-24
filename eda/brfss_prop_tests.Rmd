@@ -109,7 +109,6 @@ plot_outcome_props = function(df){
     geom_point(aes(x = estimate1), color = "blue") +
     geom_point(aes(x = estimate2), color = "red") +
     geom_segment(aes(x = estimate1, xend = estimate2, color = significant_increase)) + 
-    xlab("Prop Estimate (2017 vs. 2024)") +
     scale_color_manual(
       values = c("TRUE" = "red", "FALSE" = "gray"),
       labels = c("Significant Increase (p < 0.05)", "No Significant Increase"),
@@ -228,7 +227,6 @@ plot_outcome_props = function(df){
     geom_point(aes(x = estimate1), color = "blue") +
     geom_point(aes(x = estimate2), color = "red") +
     geom_segment(aes(x = estimate1, xend = estimate2, color = significant_increase)) + 
-    xlab("Prop Estimate (2017 vs. 2024)") +
     scale_color_manual(
       values = c("TRUE" = "red", "FALSE" = "gray"),
       labels = c("Significant Increase (p < 0.05)", "No Significant Increase"),
@@ -236,8 +234,8 @@ plot_outcome_props = function(df){
     ) +
     labs(
       title = outcome,
-      subtitle = "Ordered by 2017 Rate (Estimate 1)",
-      x = "Prop Estimate (2017 vs. 2024)",
+      subtitle = "Ordered by Pre-Legalization Rate (Estimate 1)",
+      x = "Prop Estimate (Before vs. After Legalization)",
       y = "State"
     )
 }
