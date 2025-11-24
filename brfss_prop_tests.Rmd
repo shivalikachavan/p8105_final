@@ -14,7 +14,7 @@ knitr::opts_chunk$set(
 )
 library(tidyverse)
 source(here::here("source", "load_clean_brfss.R"))
-brfss_data = load_clean_brfss(here::here("data", "brfss_clean_2017_2024.csv"))
+brfss_data = load_clean_brfss(here::here("data", "brfss_clean_2017_2024.csv.zip"))
 state_fips = read_csv(here::here("data", "legal_sports_report", "state_fips.csv"))
 ```
 

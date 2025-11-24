@@ -23,10 +23,10 @@ library(tidyverse)
 
 ``` r
 source(here::here("source", "load_clean_brfss.R"))
-brfss_data = load_clean_brfss(here::here("data", "brfss_clean_2017_2024.csv"))
+brfss_data = load_clean_brfss(here::here("data", "brfss_clean_2017_2024.csv.zip"))
 ```
 
-    ## Rows: 36 Columns: 6
+    ## Rows: 37 Columns: 6
     ## ── Column specification ────────────────────────────────────────────────────────
     ## Delimiter: ","
     ## chr  (2): state, abbr
@@ -35,6 +35,7 @@ brfss_data = load_clean_brfss(here::here("data", "brfss_clean_2017_2024.csv"))
     ## 
     ## ℹ Use `spec()` to retrieve the full column specification for this data.
     ## ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
+    ## Multiple files in zip: reading 'brfss_clean_2017_2024.csv'
     ## Rows: 2749477 Columns: 39
     ## ── Column specification ────────────────────────────────────────────────────────
     ## Delimiter: ","

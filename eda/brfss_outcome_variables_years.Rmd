@@ -9,7 +9,7 @@ Purpose: Identify which years outcome variables are available to use for analysi
 ```{r}
 library(tidyverse)
 source(here::here("source", "load_clean_brfss.R"))
-brfss_data = load_clean_brfss(here::here("data", "brfss_clean_2017_2024.csv"))
+brfss_data = load_clean_brfss(here::here("data", "brfss_clean_2017_2024.csv.zip"))
 ```
 
 ```{r}
