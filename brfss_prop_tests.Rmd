@@ -18,36 +18,37 @@ brfss_data = load_clean_brfss(here::here("data", "brfss_clean_2017_2024.csv.zip"
 state_fips = read_csv(here::here("data", "legal_sports_report", "state_fips.csv"))
 ```
 
-Writing function for running prop test
+
+Writing function for running prop test by year
 ```{r}
 run_prop_test_state = function(state_df){
   
   counts = 
     state_df |> 
-    group_by(year = year(date), mental_health_not_good_days) |>
+    group_by(year = year(date), outcome_value) |>
     summarize(
       n = n(), 
       .groups = "drop"
-    ) |> 
+      ) |> 
+    filter(!is.na(outcome_value)) |> 
     pivot_wider(
-      names_from = mental_health_not_good_days,
+      names_from = outcome_value,
       values_from = n
-    ) |> 
-    mutate(total_responses = `0` + `1-13` + `14+`) |> 
-    select(`14+`, total_responses)
+      ) |> 
+    mutate(
+      total_responses = `TRUE` + `FALSE`
+      ) 
   
-  bad_mental_health_14_counts <- counts |> pull(`14+`)
-  total_counts <- counts |> pull(total_responses)
+  x_poor_outcome <- counts |> pull(`TRUE`)
+  n_total_counts <- counts |> pull(total_responses)
   
   if (nrow(counts) < 2) {
-    return(tibble(
-      NA
-    ))
+    return(tibble(NA))
   }
   
   prop_test_result <- prop.test(
-    x = bad_mental_health_14_counts, 
-    n = total_counts, 
+    x = x_poor_outcome, 
+    n = n_total_counts, 
     alternative = "less", 
     conf.level = 0.95
   ) 
@@ -56,36 +57,41 @@ run_prop_test_state = function(state_df){
     broom::tidy()
     
 }
+
 ```
 
-Testing function
+Function for running prop test for a single outcome
 ```{r}
-brfss_data |> 
-  filter(year(date) %in% c(2017, 2024)) |> 
-  filter(state == 36) |> 
-  run_prop_test_state()
 
-
-brfss_data |> 
-  filter(year(date) %in% c(2017, 2024)) |> 
-  filter(state == 47) |> 
-  run_prop_test_state()
 ```
+
 
 Mapping across all states
 ```{r}
+
+# any_physical_health_not_good_days, any_mental_health_not_good_days, 
+#         has_depressive_disorder, has_binge_drink,
+
+outcome_vars <- c("any_physical_health_not_good_days", "any_mental_health_not_good_days",
+                  "has_depressive_disorder", "has_binge_drink")
+
 prop_tests_state = 
   brfss_data |> 
   filter(year(date) %in% c(2017, 2024)) |>
-  select(state, date, mental_health_not_good_days) |>
-  group_by(state) |>
+  select(state, date, all_of(outcome_vars)) |>
+  pivot_longer(
+        cols = all_of(outcome_vars),
+        names_to = "outcome",
+        values_to = "outcome_value" 
+    ) |>
+  group_by(state, outcome) |>
   nest() |> 
   mutate(
     test_result = map(data, run_prop_test_state)
   ) |> 
   select(-data) |> 
   unnest(cols = c(test_result)) |> 
-  select(state, estimate1, estimate2, p.value, conf.low, conf.high) |> 
+  select(state, outcome, estimate1, estimate2, p.value, conf.low, conf.high) |> 
   mutate(
     significant_increase = p.value < 0.05
   )
@@ -96,21 +102,52 @@ prop_tests_state
 ```{r}
 plotting_df = 
   prop_tests_state |> 
+  rename(fips = state) |> 
+  left_join(state_fips, by = "fips") |> 
   drop_na(estimate1, estimate2) |>
   mutate(
     significant_increase = factor(significant_increase, levels = c(TRUE, FALSE))
-  ) |> 
-  rename(fips = state) |> 
-  left_join(state_fips, by = "fips")
+  ) 
+
+plot_outcome_props = function(df){
+  
+  outcome = unique(pull(df,outcome))
+  
+  df |> 
+    ggplot(aes(y = fct_reorder(abbr, estimate1))) + 
+    geom_point(aes(x = estimate1), color = "blue") +
+    geom_point(aes(x = estimate2), color = "red") +
+    geom_segment(aes(x = estimate1, xend = estimate2, color = significant_increase)) + 
+    xlab("Prop Estimate (2017 vs. 2024)") +
+    scale_color_manual(
+      values = c("TRUE" = "red", "FALSE" = "gray"),
+      labels = c("Significant Increase (p < 0.05)", "No Significant Increase"),
+      name = "Change Magnitude"
+    ) +
+    labs(
+      title = outcome,
+      subtitle = "Ordered by 2017 Rate (Estimate 1)",
+      x = "Prop Estimate (2017 vs. 2024)",
+      y = "State"
+    )
+}
   
 
-plotting_df |> 
-  ggplot(aes(y = abbr)) + 
-  geom_point(aes(x = estimate1), color = "blue") +
-  geom_point(aes(x = estimate2), color = "red") +
-  geom_segment(aes(x = estimate1, xend = estimate2, color = significant_increase))+
-  xlab("Prop Estimate (2017 vs. 2024)")
+outcome_vars_unique <- unique(pull(plotting_df,outcome))
 
+
+for (current_outcome in outcome_vars_unique) {
+  plot = 
+    plotting_df |>
+    filter(outcome == current_outcome) |> 
+    plot_outcome_props()
+  
+  print(plot)
+    
+}
+
+
+  
 ```
 
 
