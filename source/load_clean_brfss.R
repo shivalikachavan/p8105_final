@@ -142,7 +142,7 @@ load_clean_brfss = function(filepath){
       medical_cost_barrier = case_match(medcost_standard, 1 ~ "Yes", 2 ~ "No", 7 ~ NA, 9 ~ NA, .default = NA) |> as.factor(),
       
       difficulty_self_care = case_match(diffalon, 1 ~ "Yes", 2 ~ "No", .default = NA) |> as.factor(),
-      
+    
       life_satisfaction =
         case_match(
           lsatisfy,
@@ -178,7 +178,35 @@ load_clean_brfss = function(filepath){
       lost_reduced_employment = case_match(sdhemply, 1 ~ "Yes", 2 ~ "No", .default = NA) |> as.factor(),
       
       financial_strain_bills = case_match(sdhbills, 1 ~ "Yes", 2 ~ "No", .default = NA) |> as.factor(),
-      financial_strain_utilities = case_match(sdhbills, 1 ~ "Yes", 2 ~ "No", .default = NA) |> as.factor()
+      financial_strain_utilities = case_match(sdhbills, 1 ~ "Yes", 2 ~ "No", .default = NA) |> as.factor(),
+      
+      # Adding binary versions of outcomes for prop tests and regression
+      any_physical_health_not_good_days = 
+        case_match(
+          physical_health_not_good_days,
+          "0" ~ FALSE,
+          "1-13" ~ TRUE,
+          "14+" ~ TRUE
+        ),
+      any_mental_health_not_good_days = 
+        case_match(
+          mental_health_not_good_days,
+          "0" ~ FALSE,
+          "1-13" ~ TRUE,
+          "14+" ~ TRUE
+        ),
+      has_depressive_disorder = 
+        case_match(
+          depressive_disorder,
+          "No" ~ FALSE, 
+          "Yes" ~ TRUE
+        ),
+      has_binge_drink = 
+        case_match(
+          binge_drink,
+          "No" ~ FALSE, 
+          "Yes" ~ TRUE
+        )
     ) |>
     
     #add in whether sports betting was legal at the time of the interview
@@ -201,6 +229,8 @@ load_clean_brfss = function(filepath){
         life_satisfaction, emotional_support, loneliness,
         binge_drink, heavy_drink,
         lost_reduced_employment, financial_strain_bills, financial_strain_utilities,
+        any_physical_health_not_good_days, any_mental_health_not_good_days, 
+        has_depressive_disorder, has_binge_drink,
         #Sports Betting Legal
         sb_legal
       ) 
