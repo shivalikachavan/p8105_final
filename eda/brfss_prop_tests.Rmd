@@ -17,6 +17,9 @@ source(here::here("source", "load_clean_brfss.R"))
 brfss_data = load_clean_brfss(here::here("data", "brfss_clean_2017_2024.csv.zip"))
 state_fips = read_csv(here::here("data", "legal_sports_report", "state_fips.csv"))
 state_fips_legalized_only = read_csv(here::here("data", "legal_sports_report", "state_legalization_dates.csv"))
+
+outcome_vars <- c("any_physical_health_not_good_days", "any_mental_health_not_good_days",
+                  "has_depressive_disorder", "has_binge_drink")
 ```
 
 ### 2017 vs. 2024
@@ -182,8 +185,6 @@ run_prop_test_state_legalization = function(state_df){
 
 Mapping across all states
 ```{r}
-outcome_vars <- c("any_physical_health_not_good_days", "any_mental_health_not_good_days",
-                  "has_depressive_disorder", "has_binge_drink")
 prop_tests_sb_legal = 
   brfss_data |> 
   select(state, sb_legal, all_of(outcome_vars)) |>
@@ -204,13 +205,13 @@ prop_tests_sb_legal =
     significant_increase = p.value < 0.05
   )
 
-prop_tests_state
+prop_tests_sb_legal
 ```
 
 Plotting
 ```{r}
 plotting_df = 
-  prop_tests_state |> 
+  prop_tests_sb_legal |> 
   rename(fips = state) |> 
   right_join(state_fips_legalized_only, by = "fips") |> 
   drop_na(estimate1, estimate2) |>
@@ -254,3 +255,57 @@ for (current_outcome in outcome_vars_unique) {
     
 }
 ```
+
+### Before and After legalization - only looking at adults <50
+```{r}
+prop_tests_sb_legal = 
+  brfss_data |> 
+  filter(age_group_5yr %in% c("18-24", "25-29", "30-34", "35-39", "40-44", "45-49")) |> 
+  select(state, sb_legal, all_of(outcome_vars)) |>
+  pivot_longer(
+        cols = all_of(outcome_vars),
+        names_to = "outcome",
+        values_to = "outcome_value" 
+    ) |>
+  group_by(state, outcome) |>
+  nest() |> 
+  mutate(
+    test_result = map(data, run_prop_test_state_legalization)
+  ) |> 
+  select(-data) |> 
+  unnest(cols = c(test_result)) |> 
+  select(state, outcome, estimate1, estimate2, p.value, conf.low, conf.high) |> 
+  mutate(
+    significant_increase = p.value < 0.05
+  )
+
+prop_tests_sb_legal
+
+
+plotting_df = 
+  prop_tests_sb_legal |> 
+  rename(fips = state) |> 
+  right_join(state_fips_legalized_only, by = "fips") |> 
+  drop_na(estimate1, estimate2) |>
+  mutate(
+    significant_increase = factor(significant_increase, levels = c(TRUE, FALSE))
+  ) 
+
+
+  
+
+outcome_vars_unique <- unique(pull(plotting_df,outcome))
+
+
+for (current_outcome in outcome_vars_unique) {
+  plot = 
+    plotting_df |>
+    filter(outcome == current_outcome) |> 
+    plot_outcome_props()
+  
+  print(plot)
+    
+}
+```
+
+
