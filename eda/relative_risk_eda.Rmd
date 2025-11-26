@@ -23,6 +23,14 @@ outcome_vars <- c("any_physical_health_not_good_days", "any_mental_health_not_go
 
 According to PEW research, "Young adults are more likely than older Americans to say they’ve placed a sports bet in the past year."
 
+We are using the 4 following health outcomes:
+
+  * *At least 1 poor mental health day*: "Now thinking about your mental health, which includes stress, depression, and problems with emotions, for how many days during the past 30 days was your mental health not good?" 
+  * *At least 1 poor physical health day*: "Now thinking about your physical health, which includes physical illness and injury, for how many days during the past 30 days was your physical health not good?"
+  * *Depression*: "Has a doctor or other health professional ever told you that you had a depressive disorder, including depression, major depression, dysthymia, or minor depression?"
+  * *Binge Drinking:* "Considering all alcoholic beverages that you drink, on average, how many times per month do you have 5 (for men) or 4 (for women) or more drinks on one occasion?"
+  
+
 ```{r}
 run_fishers_test = function(df){
   summary_df_wide = 
@@ -108,11 +116,20 @@ binge_drink_results =
 ```
 Among BRFSS participants in 2024 between the ages of 18 and 29, those who resided in states with legalized sports betting had:
 
-  * `r round(phys_health_results$risk_ratio, digits = 2)`x risk of having at least 1 day of poor physical health
-  * `r round(ment_health_results$risk_ratio, digits = 2)`x risk of having at least 1 day of poor mental health
-  * `r round(depression_results$risk_ratio, digits = 2)`x risk of having depression
-  * `r round(binge_drink_results$risk_ratio, digits = 2)`x risk of binge drinking 
+  * `r round(pull(phys_health_results, risk_ratio), digits = 2)`x risk of having at least 1 day of poor physical health
+  * `r round(pull(ment_health_results, risk_ratio), digits = 2)`x risk of having at least 1 day of poor mental health
+  * `r round(pull(depression_results, risk_ratio), digits = 2)`x risk of having depression
+  * `r round(pull(binge_drink_results, risk_ratio), digits = 2)`x risk of binge drinking 
   
-compared to those residing in states where sports betting is not legal. 
+compared to those residing in states where sports betting is not legal. Each of these results also show that there is a statistically significant relationship between the status of sports betting legalization and health outcomes:
+
+  * At least 1 day of poor physical health: `r sprintf("%.2e", pull(phys_health_results, p.value))`
+  * At least 1 day of poor mental health: `r sprintf("%.2e", pull(ment_health_results, p.value))`
+  * Depression: `r sprintf("%.2e", pull(depression_results, p.value))`
+  * Binge Drinking: `r sprintf("%.2e", pull(binge_drink_results, p.value))`
+
+  
+
+
 
 

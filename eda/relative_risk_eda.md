@@ -4,6 +4,22 @@ relative_risk_eda
 According to PEW research, “Young adults are more likely than older
 Americans to say they’ve placed a sports bet in the past year.”
 
+We are using the 4 following health outcomes:
+
+- *At least 1 poor mental health day*: “Now thinking about your mental
+  health, which includes stress, depression, and problems with emotions,
+  for how many days during the past 30 days was your mental health not
+  good?”
+- *At least 1 poor physical health day*: “Now thinking about your
+  physical health, which includes physical illness and injury, for how
+  many days during the past 30 days was your physical health not good?”
+- *Depression*: “Has a doctor or other health professional ever told you
+  that you had a depressive disorder, including depression, major
+  depression, dysthymia, or minor depression?”
+- *Binge Drinking:* “Considering all alcoholic beverages that you drink,
+  on average, how many times per month do you have 5 (for men) or 4 (for
+  women) or more drinks on one occasion?”
+
 ``` r
 run_fishers_test = function(df){
   summary_df_wide = 
@@ -98,3 +114,11 @@ who resided in states with legalized sports betting had:
 - 1.15x risk of binge drinking
 
 compared to those residing in states where sports betting is not legal.
+Each of these results also show that there is a statistically
+significant relationship between the status of sports betting
+legalization and health outcomes:
+
+- At least 1 day of poor physical health: 5.08e-05
+- At least 1 day of poor mental health: 1.61e-08
+- Depression: 5.17e-04
+- Binge Drinking: 1.75e-10
