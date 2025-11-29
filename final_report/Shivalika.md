@@ -57,6 +57,19 @@ brfss_data = load_clean_brfss(here("data", "brfss_clean_2017_2024.csv.zip"))
     ## ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
 
 ``` r
+state_fips = read_csv(here("data", "legal_sports_report", "state_fips.csv"))
+```
+
+    ## Rows: 53 Columns: 3
+    ## ── Column specification ────────────────────────────────────────────────────────
+    ## Delimiter: ","
+    ## chr (2): state, abbr
+    ## dbl (1): fips
+    ## 
+    ## ℹ Use `spec()` to retrieve the full column specification for this data.
+    ## ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
+
+``` r
 sb_rev_by_month = read_csv(here("data", "legal_sports_report", "sb_rev_by_month.csv"))
 ```
 
@@ -71,6 +84,8 @@ sb_rev_by_month = read_csv(here("data", "legal_sports_report", "sb_rev_by_month.
 
 ``` r
 years_in_data = unique(year(pull(sb_rev_by_month, month)))
+
+outcome_vars = c("any_physical_health_not_good_days", "any_mental_health_not_good_days", "has_depressive_disorder", "has_binge_drink")
 ```
 
 # 1. Motivation
@@ -373,6 +388,19 @@ interest.
 # 6. Additional analysis
 
 #### If you undertake formal statistical analyses, describe these in detail
+
+To test the relationship between sports betting legalization and health
+outcomes, we employed two statistical approaches: a proportion test to
+compare the prevalence of adverse outcomes before and after the
+legalization of sports betting, and a Fisher’s Exact Test to calculate
+the Relative Risk (RR) of these outcomes in states where sports betting
+is legal vs. states where it is illegal for the most recent data in
+2024. We compared outcome rates in “exposed” (sports betting is legal)
+and “unexposed” (sports betting is not legal) populations.
+
+##### Change in Prevalence over time
+
+##### Relative Risk of Poor Mental Health Outcomes in Legal vs. Non-Legal states in 2024
 
 # 7. Discussion
 
