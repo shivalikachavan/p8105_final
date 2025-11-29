@@ -13,6 +13,7 @@ knitr::opts_chunk$set(
 library(tidyverse)
 library(epitools)
 source(here::here("source", "load_clean_brfss.R"))
+source(here::here("source", "run_fishers_test.R"))
 brfss_data = load_clean_brfss(here::here("data", "brfss_clean_2017_2024.csv.zip"))
 state_fips = read_csv(here::here("data", "legal_sports_report", "state_fips.csv"))
 state_fips_legalized_only = read_csv(here::here("data", "legal_sports_report", "state_legalization_dates.csv"))
@@ -29,58 +30,6 @@ We are using the 4 following health outcomes:
   * *At least 1 poor physical health day*: "Now thinking about your physical health, which includes physical illness and injury, for how many days during the past 30 days was your physical health not good?"
   * *Depression*: "Has a doctor or other health professional ever told you that you had a depressive disorder, including depression, major depression, dysthymia, or minor depression?"
   * *Binge Drinking:* "Considering all alcoholic beverages that you drink, on average, how many times per month do you have 5 (for men) or 4 (for women) or more drinks on one occasion?"
-  
-
-```{r}
-run_fishers_test = function(df){
-  summary_df_wide = 
-    df |> 
-    mutate(
-    sports_betting_legal = 
-      case_match(
-        sb_legal,
-        1 ~ TRUE,
-        0 ~ FALSE,
-        NA ~ FALSE
-      )
-    ) |> 
-    group_by(sports_betting_legal, outcome) |> 
-    summarize(n = n(), .groups = "drop") |> 
-    pivot_wider(
-      names_from = outcome,
-      values_from = n,
-      names_prefix = "outcome_"
-    )
-  
-  contingency_matrix = summary_df_wide |>
-    select(outcome_TRUE, outcome_FALSE) |> 
-    as.matrix()
-  
-  p_value = fisher.test(contingency_matrix) |> broom::tidy() |> pull(p.value)
-  
-  rr_result = riskratio(contingency_matrix, method = "wald")
-  
-  unexposed_poor_outcome = contingency_matrix[1,1] 
-  unexposed_good_outcome = contingency_matrix[1,2] 
-  exposed_poor_outcome = contingency_matrix[2,1] 
-  exposed_good_outcome = contingency_matrix[2,2] 
-  
-  risk_unexposed = unexposed_poor_outcome / (unexposed_poor_outcome + unexposed_good_outcome)
-  risk_exposed = exposed_poor_outcome / (exposed_poor_outcome + exposed_good_outcome)
-  
-  rr <- risk_exposed / risk_unexposed
-  
-  
-  return_df = tibble(
-    summary = list(summary_df_wide),
-    p.value = p_value,
-    risk_ratio = rr
-  )
-  
-
-}
-```
-
 
 In 2024, what is the risk of having poor mental health outcomes based on state legalization?
 Exposure: betting legalization
