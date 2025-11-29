@@ -23,37 +23,9 @@ prop_tests_state =
   group_by(state, outcome) |>
   nest() |> 
   mutate(test_result = map(data, run_prop_test_state)) |> 
-  select(-data) |> 
-  unnest(cols = c(test_result)) |> 
-  select(state, outcome, estimate1, estimate2, p.value, conf.low, conf.high) |> 
-  mutate(significant_increase = p.value < 0.05)
+  factor_significant()
 
-prop_tests_state
-## # A tibble: 216 × 8
-## # Groups:   state, outcome [216]
-##    state outcome                 estimate1 estimate2  p.value conf.low conf.high
-##    <dbl> <chr>                       <dbl>     <dbl>    <dbl>    <dbl>     <dbl>
-##  1     1 any_physical_health_no…    0.415      0.401 9.06e- 1       -1   0.0309 
-##  2     1 any_mental_health_not_…    0.346      0.384 9.13e- 5       -1  -0.0209 
-##  3     1 has_depressive_disorder    0.234      0.239 2.96e- 1       -1   0.00974
-##  4     1 has_binge_drink            0.0876     0.109 2.34e- 4       -1  -0.0112 
-##  5     2 any_physical_health_no…    0.402      0.414 1.72e- 1       -1   0.00829
-##  6     2 any_mental_health_not_…    0.321      0.405 2.98e-13       -1  -0.0652 
-##  7     2 has_depressive_disorder    0.171      0.210 2.79e- 5       -1  -0.0229 
-##  8     2 has_binge_drink            0.154      0.150 6.64e- 1       -1   0.0185 
-##  9     4 any_physical_health_no…    0.367      0.410 6.29e- 9       -1  -0.0299 
-## 10     4 any_mental_health_not_…    0.311      0.393 3.09e-30       -1  -0.0697 
-## # ℹ 206 more rows
-## # ℹ 1 more variable: significant_increase <lgl>
-
-plotting_df = 
-  prop_tests_state |> 
-  rename(fips = state) |> 
-  left_join(state_fips, by = "fips") |> 
-  drop_na(estimate1, estimate2) |>
-  mutate(significant_increase = factor(significant_increase, levels = c(TRUE, FALSE))) 
-
-combine_plots(plotting_df)
+combine_plots(prop_tests_state)
 ```
 
 <img src="brfss_prop_tests_files/figure-gfm/unnamed-chunk-1-1.png" width="95%" />
@@ -74,40 +46,11 @@ prop_tests_sb_legal =
     ) |>
   group_by(state, outcome) |>
   nest() |> 
-  mutate(
-    test_result = map(data, run_prop_test_state_legalization)
-  ) |> 
-  select(-data) |> 
-  unnest(cols = c(test_result)) |> 
-  select(state, outcome, estimate1, estimate2, p.value, conf.low, conf.high) |> 
-  mutate(significant_increase = p.value < 0.05)
+  mutate(test_result = map(data, run_prop_test_state_legalization)) |> 
+  factor_significant()
 
-prop_tests_sb_legal
-## # A tibble: 216 × 8
-## # Groups:   state, outcome [216]
-##    state outcome                estimate1 estimate2   p.value conf.low conf.high
-##    <dbl> <chr>                      <dbl>     <dbl>     <dbl>    <dbl>     <dbl>
-##  1     1 any_physical_health_n…    NA        NA     NA              NA   NA     
-##  2     1 any_mental_health_not…    NA        NA     NA              NA   NA     
-##  3     1 has_depressive_disord…    NA        NA     NA              NA   NA     
-##  4     1 has_binge_drink           NA        NA     NA              NA   NA     
-##  5     2 any_physical_health_n…    NA        NA     NA              NA   NA     
-##  6     2 any_mental_health_not…    NA        NA     NA              NA   NA     
-##  7     2 has_depressive_disord…    NA        NA     NA              NA   NA     
-##  8     2 has_binge_drink           NA        NA     NA              NA   NA     
-##  9     4 any_physical_health_n…     0.365     0.401  3.25e-20       -1   -0.0296
-## 10     4 any_mental_health_not…     0.341     0.384  4.83e-28       -1   -0.0360
-## # ℹ 206 more rows
-## # ℹ 1 more variable: significant_increase <lgl>
-
-plotting_df = 
-  prop_tests_sb_legal |> 
-  rename(fips = state) |> 
-  left_join(state_fips, by = "fips") |> 
-  drop_na(estimate1, estimate2) |>
-  mutate(significant_increase = factor(significant_increase, levels = c(TRUE, FALSE))) 
-
-combine_plots(plotting_df)
+  
+combine_plots(prop_tests_sb_legal)
 ```
 
 <img src="brfss_prop_tests_files/figure-gfm/unnamed-chunk-2-1.png" width="95%" />
@@ -127,42 +70,10 @@ prop_tests_sb_legal =
     ) |>
   group_by(state, outcome) |>
   nest() |> 
-  mutate(
-    test_result = map(data, run_prop_test_state_legalization)
-  ) |> 
-  select(-data) |> 
-  unnest(cols = c(test_result)) |> 
-  select(state, outcome, estimate1, estimate2, p.value, conf.low, conf.high) |> 
-  mutate(significant_increase = p.value < 0.05)
+  mutate(test_result = map(data, run_prop_test_state_legalization)) |> 
+  factor_significant()
 
-prop_tests_sb_legal
-## # A tibble: 216 × 8
-## # Groups:   state, outcome [216]
-##    state outcome                estimate1 estimate2   p.value conf.low conf.high
-##    <dbl> <chr>                      <dbl>     <dbl>     <dbl>    <dbl>     <dbl>
-##  1     1 any_physical_health_n…    NA        NA     NA              NA   NA     
-##  2     1 any_mental_health_not…    NA        NA     NA              NA   NA     
-##  3     1 has_depressive_disord…    NA        NA     NA              NA   NA     
-##  4     1 has_binge_drink           NA        NA     NA              NA   NA     
-##  5     2 any_physical_health_n…    NA        NA     NA              NA   NA     
-##  6     2 any_mental_health_not…    NA        NA     NA              NA   NA     
-##  7     2 has_depressive_disord…    NA        NA     NA              NA   NA     
-##  8     2 has_binge_drink           NA        NA     NA              NA   NA     
-##  9     4 any_physical_health_n…     0.334     0.385  4.09e-13       -1   -0.0391
-## 10     4 any_mental_health_not…     0.469     0.540  2.44e-22       -1   -0.0594
-## # ℹ 206 more rows
-## # ℹ 1 more variable: significant_increase <lgl>
-
-plotting_df = 
-  prop_tests_sb_legal |> 
-  rename(fips = state) |> 
-  left_join(state_fips, by = "fips") |> 
-  drop_na(estimate1, estimate2) |>
-  mutate(
-    significant_increase = factor(significant_increase, levels = c(TRUE, FALSE))
-  ) 
-
-combine_plots(plotting_df)
+combine_plots(prop_tests_sb_legal)
 ```
 
 <img src="brfss_prop_tests_files/figure-gfm/unnamed-chunk-3-1.png" width="95%" />

@@ -101,6 +101,20 @@ plot_outcome_props = function(outcome, df){
   p
 }
 
+
+factor_significant = function(df){
+  df |>
+    select(-data) |> 
+    unnest(cols = c(test_result)) |> 
+    select(state, outcome, estimate1, estimate2, p.value, conf.low, conf.high) |> 
+    mutate(significant_increase = p.value < 0.05) |> 
+    rename(fips = state) |> 
+    left_join(state_fips, by = "fips") |> 
+    drop_na(estimate1, estimate2) |>
+    mutate(significant_increase = factor(significant_increase, levels = c(TRUE, FALSE)))
+}
+
+
 combine_plots = function(plotting_df){
   
   outcome_plots = 
@@ -119,3 +133,5 @@ combine_plots = function(plotting_df){
   plots_combined
   
 }
+
+
