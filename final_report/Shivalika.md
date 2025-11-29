@@ -28,9 +28,13 @@ library(here)
     ## here() starts at /Users/shivalikachavan/Documents/School/AU 2025/P8105 - Data Science I/Projects/Final/p8105_final
 
 ``` r
-# Load your custom functions
+library(patchwork)
+library(epitools)
+
 source(here("source", "filter_brfss_data.R"))
 source(here("source", "standardize_brfss_variable.R"))
+source(here("source", "prop_test_functions.R"))
+source(here("source", "run_fishers_test.R"))
 source(here("source", "load_clean_brfss.R"))
 
 brfss_data = load_clean_brfss(here("data", "brfss_clean_2017_2024.csv.zip"))
@@ -164,7 +168,7 @@ One of our primary concerns with data was ensuring that the key outcome
 variables were reported consistently from 2017 to 2024.
 
 ``` r
-outcome_vars = c("general_health", "general_health_refactored", "michd",
+all_outcome_vars = c("general_health", "general_health_refactored", "michd",
                  "physical_health", "physical_health_not_good_days", "leisure_physical_activity_last_30_days",
                  "mental_health", "mental_health_not_good_days", "poor_health", "depressive_disorder",
                  "difficulty_self_care", "life_satisfaction", "emotional_support", "loneliness", "binge_drink",
@@ -209,9 +213,9 @@ find_complete_years = function(outcome_var, summary_df){
 }
 
 complete_outcomes = tibble(
-  outcome = outcome_vars,
-  summary = map(outcome_vars, summarize_outcome_by_year),
-  n_complete_years = map2(outcome_vars, summary, find_complete_years)
+  outcome = all_outcome_vars,
+  summary = map(all_outcome_vars, summarize_outcome_by_year),
+  n_complete_years = map2(all_outcome_vars, summary, find_complete_years)
   ) |> 
   arrange(n_complete_years) |> 
   filter(
@@ -219,7 +223,7 @@ complete_outcomes = tibble(
   ) |> 
   pull(outcome)
 
-setdiff(outcome_vars, complete_outcomes)
+setdiff(all_outcome_vars, complete_outcomes)
 ## [1] "life_satisfaction"          "emotional_support"         
 ## [3] "loneliness"                 "lost_reduced_employment"   
 ## [5] "financial_strain_bills"     "financial_strain_utilities"
@@ -398,10 +402,267 @@ is legal vs. states where it is illegal for the most recent data in
 2024. We compared outcome rates in “exposed” (sports betting is legal)
 and “unexposed” (sports betting is not legal) populations.
 
-##### Change in Prevalence over time
+##### Prop Tests
+
+Our one-sided two sample proportion tests are examining whether there is
+a significant change (baseline is lower) in the rates of the 4 health
+outcomes. In the first test, for example, the null hypothesis is that
+the rate of a particular outcome (e.g. binge drinking) is the same in
+2017 and in 2024. The alternative is that the rate of binge drinking was
+less in 2017 that it was in 2024.
+
+These tests looks at the raw change over time, regardless of when
+legalization occurred, providing a general benchmark. The lines show the
+change, and the color indicates statistical significance.
+
+``` r
+prop_tests_state = 
+  brfss_data |> 
+  filter(year(date) %in% c(2017, 2024)) |>
+  select(state, date, all_of(outcome_vars)) |>
+  pivot_longer(
+    cols = all_of(outcome_vars),
+    names_to = "outcome",
+    values_to = "outcome_value" 
+    ) |>
+  group_by(state, outcome) |>
+  nest() |> 
+  mutate(test_result = map(data, run_prop_test_state)) |> 
+  factor_significant()
+
+combine_plots(prop_tests_state)
+```
+
+<img src="Shivalika_files/figure-gfm/unnamed-chunk-6-1.png" width="95%" />
+
+The second test we wanted to run used each state’s specific legalization
+date, `sb_legal`, as the inflection point. We also repeated this test
+looking specifically at adults under 50 due to their higher
+participation in sports betting.
+
+``` r
+prop_tests_sb_legal = 
+  brfss_data |> 
+  select(state, sb_legal, all_of(outcome_vars)) |>
+  pivot_longer(
+    cols = all_of(outcome_vars),
+    names_to = "outcome",
+    values_to = "outcome_value" 
+    ) |>
+  group_by(state, outcome) |>
+  nest() |> 
+  mutate(test_result = map(data, run_prop_test_state_legalization)) |> 
+  factor_significant()
+
+combine_plots(prop_tests_sb_legal)
+```
+
+<img src="Shivalika_files/figure-gfm/unnamed-chunk-7-1.png" width="95%" />
+
+``` r
+prop_tests_sb_legal = 
+  brfss_data |> 
+  filter(age_group_5yr %in% c("18-24", "25-29", "30-34", "35-39", "40-44", "45-49")) |> 
+  select(state, sb_legal, all_of(outcome_vars)) |>
+  pivot_longer(
+    cols = all_of(outcome_vars),
+    names_to = "outcome",
+    values_to = "outcome_value" 
+    ) |>
+  group_by(state, outcome) |>
+  nest() |> 
+  mutate(test_result = map(data, run_prop_test_state_legalization)) |> 
+  factor_significant()
+
+combine_plots(prop_tests_sb_legal)
+```
+
+<img src="Shivalika_files/figure-gfm/unnamed-chunk-8-1.png" width="95%" />
 
 ##### Relative Risk of Poor Mental Health Outcomes in Legal vs. Non-Legal states in 2024
+
+According to PEW research, “Young adults are more likely than older
+Americans to say they’ve placed a sports bet in the past year.”
+
+We are using the 4 following health outcomes:
+
+- *At least 1 poor mental health day*: “Now thinking about your mental
+  health, which includes stress, depression, and problems with emotions,
+  for how many days during the past 30 days was your mental health not
+  good?”
+- *At least 1 poor physical health day*: “Now thinking about your
+  physical health, which includes physical illness and injury, for how
+  many days during the past 30 days was your physical health not good?”
+- *Depression*: “Has a doctor or other health professional ever told you
+  that you had a depressive disorder, including depression, major
+  depression, dysthymia, or minor depression?”
+- *Binge Drinking:* “Considering all alcoholic beverages that you drink,
+  on average, how many times per month do you have 5 (for men) or 4 (for
+  women) or more drinks on one occasion?”
+
+In 2024, what is the risk of having poor mental health outcomes based on
+state legalization?
+
+Exposure: betting legalization
+
+Outcomes: any_physical_health_not_good_days,
+any_mental_health_not_good_days, has_depressive_disorder,
+has_binge_drink
+
+We opted to use a Fisher’s exact test in the event that one of the
+counts happened to be small. The goal of this test is to determine if
+there is a statistically significant association between status of
+sports betting legalization and the presence of the 4 health outcomes.
+
+``` r
+phys_health_results = 
+  brfss_data |>
+  filter(year(date) == 2024, age_group_5yr %in% c("18-24", "25-29"), !is.na(any_physical_health_not_good_days)) |>
+  select(sb_legal, any_physical_health_not_good_days) |> 
+  rename(outcome = any_physical_health_not_good_days) |> 
+  run_fishers_test()
+
+phys_health_results |> pull(summary) |> knitr::kable()
+```
+
+<table class="kable_wrapper">
+
+<tbody>
+
+<tr>
+
+<td>
+
+| sports_betting_legal | outcome_FALSE | outcome_TRUE |
+|:---------------------|--------------:|-------------:|
+| FALSE                |          6578 |         4186 |
+| TRUE                 |         15277 |        10692 |
+
+</td>
+
+</tr>
+
+</tbody>
+
+</table>
+
+``` r
+
+ment_health_results = 
+  brfss_data |>
+  filter(year(date) == 2024, age_group_5yr %in% c("18-24", "25-29"), !is.na(any_mental_health_not_good_days)) |>
+  select(sb_legal, any_mental_health_not_good_days) |> 
+  rename(outcome = any_mental_health_not_good_days) |> 
+  run_fishers_test()
+
+ment_health_results |> pull(summary) |> knitr::kable()
+```
+
+<table class="kable_wrapper">
+
+<tbody>
+
+<tr>
+
+<td>
+
+| sports_betting_legal | outcome_FALSE | outcome_TRUE |
+|:---------------------|--------------:|-------------:|
+| FALSE                |          4357 |         6384 |
+| TRUE                 |          9739 |        16298 |
+
+</td>
+
+</tr>
+
+</tbody>
+
+</table>
+
+``` r
+
+depression_results = 
+  brfss_data |>
+  filter(year(date) == 2024, age_group_5yr %in% c("18-24", "25-29"), !is.na(has_depressive_disorder)) |>
+  select(sb_legal, has_depressive_disorder) |> 
+  rename(outcome = has_depressive_disorder) |> 
+  run_fishers_test()
+
+depression_results |> pull(summary) |> knitr::kable()
+```
+
+<table class="kable_wrapper">
+
+<tbody>
+
+<tr>
+
+<td>
+
+| sports_betting_legal | outcome_FALSE | outcome_TRUE |
+|:---------------------|--------------:|-------------:|
+| FALSE                |          8050 |         2794 |
+| TRUE                 |         18989 |         7211 |
+
+</td>
+
+</tr>
+
+</tbody>
+
+</table>
+
+``` r
+
+binge_drink_results = 
+  brfss_data |>
+  filter(year(date) == 2024, age_group_5yr %in% c("18-24", "25-29"), !is.na(has_binge_drink)) |>
+  select(sb_legal, has_binge_drink) |> 
+  rename(outcome = has_binge_drink) |> 
+  run_fishers_test()
+
+binge_drink_results |> pull(summary) |> knitr::kable()
+```
+
+<table class="kable_wrapper">
+
+<tbody>
+
+<tr>
+
+<td>
+
+| sports_betting_legal | outcome_FALSE | outcome_TRUE |
+|:---------------------|--------------:|-------------:|
+| FALSE                |          8474 |         2278 |
+| TRUE                 |         19721 |         6319 |
+
+</td>
+
+</tr>
+
+</tbody>
+
+</table>
 
 # 7. Discussion
 
 #### What were your findings? Are they what you expect? What insights into the data can you make?
+
+Among BRFSS participants in 2024 between the ages of 18 and 29, those
+who resided in states with legalized sports betting had:
+
+- 1.06x risk of having at least 1 day of poor physical health
+- 1.05x risk of having at least 1 day of poor mental health
+- 1.07x risk of having depression
+- 1.15x risk of binge drinking
+
+compared to those residing in states where sports betting is not legal.
+Each of these results also show that there is a statistically
+significant relationship between the status of sports betting
+legalization and health outcomes:
+
+- At least 1 day of poor physical health: 5.08e-05
+- At least 1 day of poor mental health: 1.61e-08
+- Depression: 5.17e-04
+- Binge Drinking: 1.75e-10
