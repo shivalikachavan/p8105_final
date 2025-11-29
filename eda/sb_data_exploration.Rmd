@@ -35,6 +35,7 @@ state_rev_month_df = read_csv('./data/legal_sports_report/sb_rev_by_state_month.
 state_rev_df = read_csv("./data/legal_sports_report/sb_rev_by_state.csv") 
 state_legal_df = read_csv('./data/legal_sports_report/state_legalization_dates.csv')
 state_fips_df = read_csv("./data/legal_sports_report/state_fips.csv")
+state_pop_df = read_csv("./data/state_population_census.csv")
 
 state_rev_df = state_rev_df |> 
   filter(market != "Total") |> 
@@ -136,6 +137,48 @@ fig = fig |>
 fig
 ```
 
+Just look at 2024:
+
+```{r}
+state_rev_month_df |> 
+  mutate(year = year(month)) %>%  # Extract year
+  group_by(state, year) %>%                   # Group by year
+  summarize(
+    total_handle = sum(handle, na.rm = TRUE),
+  ) |> 
+  filter(year == 2024) |> 
+  ungroup() |> 
+  mutate(
+    state = fct_reorder(state, total_handle)
+  ) |> 
+  ggplot(aes(x=state, y= total_handle)) +
+  coord_flip() +
+  geom_bar(stat="identity")
+```
+
+Just look at 2024 per capita:
+
+```{r}
+state_rev_month_df |> 
+  mutate(year = year(month)) %>%  # Extract year
+  group_by(state, year) %>%                   # Group by year
+  summarize(
+    total_handle = sum(handle, na.rm = TRUE),
+  ) |> 
+  filter(year == 2024) |> 
+  ungroup() |> 
+  left_join(select(state_pop_df, state, "2024"), by = "state") |> 
+  rename(population_2024 = '2024') |> 
+  mutate(
+    handle_per_capita = total_handle / population_2024,
+    state = fct_reorder(state, handle_per_capita)
+  ) |> 
+  ggplot(aes(x=state, y= handle_per_capita)) +
+  coord_flip() +
+  geom_bar(stat="identity")
+```
+
+
 Look by year 
 
 ```{r}
@@ -177,7 +220,7 @@ fig = state_rev_df |>
         marker = list(size = ~hold, opacity = 0.5))
 
 fig = fig |> 
-  layout(title = 'Hold/Handle/Taxes',
+  layout(title = 'Timeline of Legalization and Total Taxes',
          xaxis = list(showgrid = FALSE),
          yaxis = list(showgrid = FALSE))
 

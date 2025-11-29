@@ -1,0 +1,334 @@
+---
+title: "linear_regression"
+output: github_document
+date: "2025-11-24"
+---
+
+```{r setup, include=FALSE}
+library(tidyverse)
+library(fixest)
+
+knitr::opts_chunk$set(echo = TRUE)
+
+source(here::here("source", "load_clean_brfss.R"))
+
+knitr::opts_chunk$set(
+  fig.width = 6,
+  fig.asp = .6,
+  out.width = "90%"
+)
+
+theme_set(theme_minimal() + theme(legend.position = "bottom"))
+
+options(
+  ggplot2.continuous.colour = "viridis",
+  ggplot2.continuous.fill = "viridis"
+)
+
+scale_colour_discrete = scale_colour_viridis_d
+scale_fill_discrete = scale_fill_viridis_d
+
+
+brfss_data = load_clean_brfss(here::here("data", "brfss_clean_2017_2024.csv.zip")) |> 
+  mutate(
+    month = lubridate::floor_date(date, unit = "month")
+ )
+state_legal_df = read_csv(here::here("data", "legal_sports_report", "state_legalization_dates.csv"))
+```
+
+# Looks at one state
+
+Look at one state for our outcome of interest:
+```{r}
+ny_df = brfss_data |> 
+  filter(
+    state == 36,
+    !is.na(sex),
+    !is.na(any_mental_health_not_good_days)
+  ) |> 
+  mutate(
+    month = lubridate::floor_date(date, unit = "month")
+)
+#    age_group_5yr %in% c("18-24", "25-29", "30-34", "35-39", "40-44", "45-49", "50-54")
+#    ) |> 
+#  filter(!is.na(sex) & !is.na(mental_health_not_good_days)) #|> 
+  #mutate(
+  #  month = lubridate::floor_date(date, unit = "month"),
+  #  mental_health_flag = case_when(
+  #    mental_health_not_good_days %in% c("1-13", "14+") ~ 1,
+  #    mental_health_not_good_days == 0 ~ 0
+  #  )
+#  ) 
+
+
+ny_df |> 
+  ggplot(aes(x = mental_health)) + 
+  geom_histogram()
+
+ny_df |> 
+  group_by(sex) |> 
+  ggplot(aes(x = any_mental_health_not_good_days, fill=sex)) + 
+  geom_bar(stat = "count", position = "dodge")
+
+ny_df |> 
+  group_by(sex, month, any_mental_health_not_good_days) |> 
+  summarize(
+    n_obs = n()
+  ) |> 
+  ggplot(aes(x=month, y=n_obs, color=any_mental_health_not_good_days)) + 
+  geom_line() +
+  facet_grid(. ~ sex)
+
+ny_df |> 
+  group_by(sex, month) |> 
+  summarize(
+    n_obs = n(),
+    mental_health_n = sum(any_mental_health_not_good_days)
+  ) |> 
+  mutate(
+    mental_health_prop = mental_health_n / n_obs
+  ) |> 
+  ggplot(aes(x=month, y=mental_health_prop, color=sex)) + 
+  geom_line() +
+  geom_vline(xintercept = as.Date("2019-07-01"), 
+                 linetype = "dashed", color = "red", linewidth = 1) +
+  annotate("text", x = as.Date("2019-07-01"), y = 0.25, label = "Retail", 
+           angle = 90, vjust = -0.5, color = "red") +
+  geom_vline(xintercept = as.Date("2022-01-01"), 
+                 linetype = "dashed", color = "orange", linewidth = 1) +
+  annotate("text", x = as.Date("2022-01-01"), y = 0.25, label = "Online", 
+           angle = 90, vjust = -0.5, color = "orange")
+```
+
+
+# Set up Regression
+
+```{r}
+fit_null = lm(any_mental_health_not_good_days ~ sex + age_group_5yr, data = brfss_data)
+fit_alt = lm(any_mental_health_not_good_days ~ sb_legal + sex + age_group_5yr, data = brfss_data)
+
+fit_null |> 
+  broom::tidy()
+
+fit_alt |> 
+  broom::tidy()
+```
+
+Filter age group < 55 (and sports betting legal, check before covid)
+
+```{r}
+brfss_age_data = brfss_data |> 
+  filter(
+    age_group_5yr %in% 
+      c("18-24","25-29","30-34","35-39","40-44","45-49","50-54"),
+    sb_legal %in% c(0, 1)) #,
+    
+    #year(date) < 2020)
+```
+
+
+Nested models:
+
+```{r}
+fit_nest =  lm(any_mental_health_not_good_days ~ sex * sb_legal + age_group_5yr * sb_legal, data = brfss_age_data) 
+
+fit_nest |> 
+  broom::tidy()
+```
+
+Use this model, our reference categories are Female and 18-25
+```{r}
+fit =  lm(any_mental_health_not_good_days ~ sex + age_group_5yr + sb_legal 
+                             + sex * sb_legal 
+                             + age_group_5yr * sb_legal, data = brfss_age_data) 
+fit_result = fit |> 
+  broom::tidy() |> 
+  select(term, estimate, std.error, p.value)
+
+fit_result |> 
+  knitr::kable(digits = 3)
+
+
+```
+### Baseline differences in mental health
+Sex: Men have a `r select(filter(fit_result, term=='sexMale'), estimate)*-100` percentage point lower probability of reporting ≥1 mentally unhealthy day compared to women (p < 0.001).
+
+Age: All age coefficients are negative, meaning older groups report fewer mentally unhealthy days than 18–24-year-olds.
+
+This matches known demographic patterns typical in BRFSS mental health data.
+
+### Overall effect of sports betting legality (sb_legal)
+Main effect: sb_legal = 0.054 `r select(filter(fit_result, term=='sb_legal'), estimate)`(p < 0.001)
+
+In the reference group (female, age 18–24), living in a state where sports betting is legal is associated with a +5.4 `r select(filter(fit_result, term=='sb_legal'), estimate)*100` percentage point higher probability of reporting ≥1 mentally unhealthy day in the past month.
+
+### Does the effect differ by sex?
+Interaction: sexMale × sb_legal = -0.001 `r select(filter(fit_result, term=='sexMale:sb_legal'), estimate)` (p = 0.588 `r select(filter(fit_result, term=='sexMale:sb_legal'), p.value)`) 
+
+There is no meaningful difference in the effect of sports betting legalization between men and women.
+The coefficient is tiny (–0.1 percentage points) and not statistically significant.
+
+### Differences by age group
+
+Each age interaction term tells us how much the effect of sports betting legality differs from the reference group (18–24).
+
+Significant positive interactions:
+| Age group	 | Interaction estimate	 | Interpretation |
+| :------- | :------- | :------- |
+
+```{r}
+fit_result |> 
+  filter(str_starts(term, "age_group_") & str_ends(term, "sb_legal")) |> 
+  select(term, estimate, p.value) |> 
+  mutate(
+    term = str_replace_all(term, c("age_group_5yr"="", ":sb_legal"=""))
+  ) |> 
+  rename("Age Group" = term) |> 
+  knitr::kable()
+```
+The effect is largest for adults 25-29 (`r select(filter(fit_result, term=='age_group_5yr25-29:sb_legal'), estimate)`) and not significant for adults 45-49 and 50-54.
+
+The impact of sports betting legalization on mentally unhealthy days appears stronger for younger adults (25–44) but then plateaus.
+
+### Overall Conclusions:
+
+* After adjusting for sex and age, living in a state with legal sports betting is associated with higher probability of having mentally unhealthy days, especially among adults aged 25–44.
+* The effect size is around 5–8 percentage points, depending on age group.
+* Men and women are affected similarly.
+* Younger adults (18–24) have the highest baseline mental health risk, but legalization effects are somewhat stronger for those 25–44.
+* These associations cannot establish causality (due to cross-sectional BRFSS data), but they indicate a robust correlation.
+
+## Predicted Probability of ≥1 Mentally Unhealthy Day
+
+```{r}
+# Build prediction grid
+pred_df = expand.grid(
+  sex = c("Female", "Male"),
+  age_group_5yr = c("18-24","25-29","30-34","35-39","40-44","45-49","50-54"),
+  sb_legal = c(0, 1)   # illegal = 0, legal = 1
+)
+
+# Get predicted probabilities and plot
+pred_df |> 
+  mutate(pred_prob = predict(fit, newdata = pred_df)) |> 
+  ggplot(aes(x = age_group_5yr, y = pred_prob,
+                    color = interaction(sex, sb_legal),
+                    group = interaction(sex, sb_legal),
+                    linetype = factor(sb_legal))) +
+  geom_line(size = 1.1) +
+  scale_color_manual(
+    name = "",
+    values = c(
+      "Female.0" = "#D98841",  # orange solid
+      "Female.1" = "#5DA5DA",  # blue dashed
+      "Male.0"   = "#017371",  # green solid
+      "Male.1"   = "#E5E500"   # yellow dashed
+    ),
+    labels = c(
+      "Female.0" = "Female - SB illegal",
+      "Female.1" = "Female - SB legal",
+      "Male.0"   = "Male - SB illegal",
+      "Male.1"   = "Male - SB legal"
+    )
+  ) +
+  scale_linetype_manual(
+    name = "",
+    values = c("0" = "solid", "1" = "dashed"),
+    labels = c("0" = "SB illegal", "1" = "SB legal")
+  ) +
+  labs(
+    x = "Age Group",
+    y = "Predicted Probability",
+    title = "Predicted Probability of ≥1 Mentally Unhealthy Day",
+    subtitle = "Interaction: Age × Sex × Sports Betting Legalization"
+  ) +
+  theme_minimal(base_size = 14) +
+  theme(
+    legend.position = "right",
+    axis.text.x = element_text(angle = 45, hjust = 1)
+  )
+```
+
+The graph shows how the predicted probability of reporting at least one mentally unhealthy day in the past month varies across age groups, sex, and whether sports betting is legal in the respondent’s state.
+
+ * Baseline trends:
+    - When sports betting is not legal: women consistently report higher rates of mentally unhealthy days than men across all age groups.
+    - Both sexes show a steady decline in mentally unhealthy days as age increases, with 18–24-year-olds exhibiting the highest risk and 50–54-year-olds the lowest.
+ * Effect of sports betting legalization:
+    - Across nearly all age groups, the dashed lines (SB legal) lie above the corresponding solid lines (SB illegal) which means sports betting legalization is associated with a higher probability of reporting mentally unhealthy days.
+    - The size of this increase varies by age
+    - The difference is largest among young and early-mid adults, especially ages 25–44.
+* Differences between men and women
+    - The vertical distance between male and female lines remains fairly constant regardless of legalization status, which indicates women consistently report more mentally unhealthy days than men.
+    - The effect of sports betting legalization is similar for both sexes (supports the non-significant sex × legalization interaction in the model).
+* Age × legalization interaction
+    - The graph visually confirms the pattern in the coefficients:
+    - Among younger adults (25–44), the increase associated with sports betting legalization is noticeably larger.
+    - By 45–54, the effect is small or negligible.
+    - This suggests that younger and mid-age adults may be more sensitive to environmental or policy changes related to gambling or these age groups may participate more in gambling or be more exposed to advertising or technology that connects them to sports betting markets.
+
+Sports betting legalization is associated with a higher probability of experiencing mentally unhealthy days, especially among adults aged 25–44, and this pattern is similar for both men and women.
+The effect does not appear uniform across age groups, indicating a meaningful age × policy interaction.
+
+```{r}
+fit_nest_model =
+  brfss_age_data |> 
+  nest(data = -sex) |> 
+  mutate(
+    models = map(data, \(df) lm(mental_health ~ sb_legal + age_group_5yr, data = df)),
+    results = map(models, broom::tidy)) |> 
+  select(-data, -models) |> 
+  unnest(results)
+
+fit_nest_model |> 
+  select(sex, term, estimate) |> 
+  mutate(term = fct_inorder(term)) |> 
+  pivot_wider(
+    names_from = term, values_from = estimate) |> 
+  knitr::kable(digits = 3)
+```
+
+Look at Fixed Effect Model (eval=FALSE):
+
+```{r eval=FALSE}
+# Outcome: Use the binary outcome for the test (e.g., 14+ bad mental health days)
+outcome = "any_mental_health_not_good_days" 
+
+# Treatment: The binary indicator for legalization exposure
+treatment = "sb_legal"
+
+# Demographics (must be continuous or factor/dummy variables)
+demographic_predictors = c("sex", "income_level", "education_status", "marital_status", 
+                            "race", "employment_status", "children_in_household",
+                            "age_group_5yr")
+
+# Fixed Effects (Defined as factors in your cleaning pipeline)
+FEs = c("state", "month")
+
+# Construct the formula string
+formula_str <- paste(
+    outcome, 
+    "~", 
+    treatment, 
+    "+", 
+    paste(demographic_predictors, collapse = " + "), 
+    "|", 
+    paste(FEs, collapse = " + ")
+)
+
+# Convert to a formula object
+model_formula = as.formula(formula_str)
+
+# Run the DiD regression:
+model_result = feols(
+    model_formula,
+    data = brfss_data,
+    # Cluster standard errors by state to account for correlation within states
+    cluster = ~state 
+)
+
+# Print the results
+summary(model_result)
+```
+
+
