@@ -3,57 +3,21 @@ P8105 Final Report
 Shivalika Chavan, Angelica Bailey, Julia Gray
 2025-11-28
 
-Make tabbable sections? add theme
+tabbable sections
 
 ``` r
 knitr::opts_chunk$set(echo = TRUE, collapse = TRUE)
 
 library(tidyverse)
-```
-
-    ## ── Attaching core tidyverse packages ──────────────────────── tidyverse 2.0.0 ──
-    ## ✔ dplyr     1.1.4     ✔ readr     2.1.5
-    ## ✔ forcats   1.0.0     ✔ stringr   1.5.1
-    ## ✔ ggplot2   3.5.2     ✔ tibble    3.3.0
-    ## ✔ lubridate 1.9.4     ✔ tidyr     1.3.1
-    ## ✔ purrr     1.1.0     
-    ## ── Conflicts ────────────────────────────────────────── tidyverse_conflicts() ──
-    ## ✖ dplyr::filter() masks stats::filter()
-    ## ✖ dplyr::lag()    masks stats::lag()
-    ## ℹ Use the conflicted package (<http://conflicted.r-lib.org/>) to force all conflicts to become errors
-
-``` r
 library(haven)
 library(lubridate)
 library(here)
-```
-
-    ## here() starts at /Users/shivalikachavan/Documents/School/AU 2025/P8105 - Data Science I/Projects/Final/p8105_final
-
-``` r
 library(patchwork)
 library(epitools)
 library(ggcorrplot)
 library(patchwork)
 library(plotly)
-```
 
-    ## 
-    ## Attaching package: 'plotly'
-    ## 
-    ## The following object is masked from 'package:ggplot2':
-    ## 
-    ##     last_plot
-    ## 
-    ## The following object is masked from 'package:stats':
-    ## 
-    ##     filter
-    ## 
-    ## The following object is masked from 'package:graphics':
-    ## 
-    ##     layout
-
-``` r
 source(here("source", "load_clean_brfss.R"))
 source(here("source", "filter_brfss_data.R"))
 source(here("source", "standardize_brfss_variable.R"))
@@ -61,109 +25,14 @@ source(here("source", "prop_test_functions.R"))
 source(here("source", "run_fishers_test.R"))
 
 brfss_data = load_clean_brfss(here("data", "brfss_clean_2017_2024.csv.zip"))
-```
-
-    ## Rows: 37 Columns: 6
-    ## ── Column specification ────────────────────────────────────────────────────────
-    ## Delimiter: ","
-    ## chr  (2): state, abbr
-    ## dbl  (1): fips
-    ## date (3): first_start, online, offline
-    ## 
-    ## ℹ Use `spec()` to retrieve the full column specification for this data.
-    ## ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
-    ## Multiple files in zip: reading 'brfss_clean_2017_2024.csv'
-    ## Rows: 2749477 Columns: 39
-    ## ── Column specification ────────────────────────────────────────────────────────
-    ## Delimiter: ","
-    ## chr   (2): imonth, iday
-    ## dbl  (36): qstver, dispcode, state, seqno, iyear, sex, marital, educag, empl...
-    ## date  (1): date
-    ## 
-    ## ℹ Use `spec()` to retrieve the full column specification for this data.
-    ## ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
-
-``` r
 state_fips = read_csv(here("data", "legal_sports_report", "state_fips.csv"))
-```
 
-    ## Rows: 53 Columns: 3
-    ## ── Column specification ────────────────────────────────────────────────────────
-    ## Delimiter: ","
-    ## chr (2): state, abbr
-    ## dbl (1): fips
-    ## 
-    ## ℹ Use `spec()` to retrieve the full column specification for this data.
-    ## ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
-
-``` r
 state_legal_dates = read_csv(here("data", "legal_sports_report", 'state_legalization_dates.csv'))
-```
-
-    ## Rows: 37 Columns: 6
-    ## ── Column specification ────────────────────────────────────────────────────────
-    ## Delimiter: ","
-    ## chr  (2): state, abbr
-    ## dbl  (1): fips
-    ## date (3): first_start, online, offline
-    ## 
-    ## ℹ Use `spec()` to retrieve the full column specification for this data.
-    ## ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
-
-``` r
 sb_rev_by_month = read_csv(here("data", "legal_sports_report", "sb_rev_by_month.csv"))
-```
-
-    ## Rows: 87 Columns: 5
-    ## ── Column specification ────────────────────────────────────────────────────────
-    ## Delimiter: ","
-    ## dbl  (4): handle, revenue, hold, taxes
-    ## date (1): month
-    ## 
-    ## ℹ Use `spec()` to retrieve the full column specification for this data.
-    ## ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
-
-``` r
 sb_rev_by_state_month = read_csv(here("data", "legal_sports_report",'sb_rev_by_state_month.csv'))
-```
-
-    ## Rows: 1975 Columns: 6
-    ## ── Column specification ────────────────────────────────────────────────────────
-    ## Delimiter: ","
-    ## chr  (1): state
-    ## dbl  (4): handle, revenue, hold, taxes
-    ## date (1): month
-    ## 
-    ## ℹ Use `spec()` to retrieve the full column specification for this data.
-    ## ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
-
-``` r
 sb_rev_by_state = read_csv(here("data", "legal_sports_report", "sb_rev_by_state.csv"))
-```
-
-    ## Rows: 40 Columns: 5
-    ## ── Column specification ────────────────────────────────────────────────────────
-    ## Delimiter: ","
-    ## chr (1): market
-    ## dbl (4): handle, revenue, hold, taxes
-    ## 
-    ## ℹ Use `spec()` to retrieve the full column specification for this data.
-    ## ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
-
-``` r
 state_pop = read_csv(here("data", "state_population_census.csv"))
-```
 
-    ## Rows: 51 Columns: 6
-    ## ── Column specification ────────────────────────────────────────────────────────
-    ## Delimiter: ","
-    ## chr (1): state
-    ## num (5): 2020, 2021, 2022, 2023, 2024
-    ## 
-    ## ℹ Use `spec()` to retrieve the full column specification for this data.
-    ## ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
-
-``` r
 years_in_data = unique(year(pull(sb_rev_by_month, month)))
 
 outcome_vars = c("any_physical_health_not_good_days", "any_mental_health_not_good_days", "has_depressive_disorder", "has_binge_drink")
@@ -195,6 +64,20 @@ discussed in class.
 # 3. Initial questions
 
 #### What questions are you trying to answer? How did these questions evolve over the course of the project? What new questions did you consider in the course of your analysis?
+
+Initial Questions: 1. What are the trends in the amount of money wagered
+(handle) across states that have legalized sports gambling? 2. Does
+legalized sports gambling have a negative effect on public health
+outcomes? This involves analyzing changes in rates of depression (or
+other mental disorders), domestic violence, and substance abuse in
+states where sports betting is legal. 3. Using the each state’s
+legalization date (if one exists) as the inflection point, are these
+health outcomes stratified by demographics (age, sex, race, tax bracket,
+and education level) and state?
+
+New Questions: 1. How are health outcomes associated with each other?
+Are there patterns between variables that may help inform what to
+control for in future analyses?
 
 # 4. Data
 
@@ -658,6 +541,22 @@ outcome variable. This also follows what Couture, et. al. used in their
 analysis. It also simplified statistical tests that we decided to do
 later on.
 
+We are using the 4 following health outcomes:
+
+- *At least 1 poor mental health day*: “Now thinking about your mental
+  health, which includes stress, depression, and problems with emotions,
+  for how many days during the past 30 days was your mental health not
+  good?”
+- *At least 1 poor physical health day*: “Now thinking about your
+  physical health, which includes physical illness and injury, for how
+  many days during the past 30 days was your physical health not good?”
+- *Depression*: “Has a doctor or other health professional ever told you
+  that you had a depressive disorder, including depression, major
+  depression, dysthymia, or minor depression?”
+- *Binge Drinking:* “Considering all alcoholic beverages that you drink,
+  on average, how many times per month do you have 5 (for men) or 4 (for
+  women) or more drinks on one occasion?”
+
 ##### Correlation Analysis
 
 To understand relationships among the health outcome variables in the
@@ -716,10 +615,17 @@ corr_females =
     title = "Correlations: females") +
   theme(plot.title = element_text(hjust = 0.5))
 
-corr_males + corr_females
+corr_males
 ```
 
 ![](Final_Report_files/figure-gfm/unnamed-chunk-11-1.png)<!-- -->
+
+``` r
+
+corr_females
+```
+
+![](Final_Report_files/figure-gfm/unnamed-chunk-11-2.png)<!-- -->
 
 Overall, the patterns of association between variables were highly
 similar across sexes with no meaningfully different direction or
@@ -764,10 +670,18 @@ days.
 On the other hand, `heavy_drink` and `binge_drink` showed weak
 correlations with most other health outcomes.
 
-\*`general_health_refactored` shows negative correlations with variables
-like `physical_health` and `mental_health`. As general health gets
-better (lower score), the number of bad health days goes up (?) This is
-an unexpected result.
+\* BRFSS contains a variable general_health which is a Likert scale from
+1-6 with 1 being “Good Health” and 6 being “Poor Health.” There is also
+a refactored general_health column with 1 being “Good Health” and 2
+being “Poor Health.” `general_health_refactored` shows negative
+correlations with variables like `physical_health` and `mental_health`.
+As general health gets better (lower score), the number of bad health
+days goes up. This is an unexpected result. We can see that
+general_health has little correlation between most other health
+outcomes, which was surprising. We assume these trends we see in
+`general_health_refactored` may not be accurate as `general_health`
+shows minimal correlation. If we were to do future analyses, we would
+want to use the narrowly defined variable `general_health.`
 
 ##### Distribution of Primary Health Outcomes by Demographic Variables
 
@@ -1017,6 +931,11 @@ date, `sb_legal`, as the inflection point. We also repeated this test
 looking specifically at adults under 50 due to their higher
 participation in sports betting.
 
+According to
+[PEW](https://www.pewresearch.org/short-reads/2025/10/02/americans-increasingly-see-legal-sports-betting-as-a-bad-thing-for-society-and-sports/)
+research, “Young adults are more likely than older Americans to say
+they’ve placed a sports bet in the past year.”
+
 ``` r
 prop_tests_sb_legal = 
   brfss_data |> 
@@ -1057,25 +976,6 @@ combine_plots(prop_tests_sb_legal)
 <img src="Final_Report_files/figure-gfm/unnamed-chunk-20-1.png" width="95%" />
 
 ##### Relative Risk of Poor Mental Health Outcomes in Legal vs. Non-Legal states in 2024
-
-According to PEW research, “Young adults are more likely than older
-Americans to say they’ve placed a sports bet in the past year.”
-
-We are using the 4 following health outcomes:
-
-- *At least 1 poor mental health day*: “Now thinking about your mental
-  health, which includes stress, depression, and problems with emotions,
-  for how many days during the past 30 days was your mental health not
-  good?”
-- *At least 1 poor physical health day*: “Now thinking about your
-  physical health, which includes physical illness and injury, for how
-  many days during the past 30 days was your physical health not good?”
-- *Depression*: “Has a doctor or other health professional ever told you
-  that you had a depressive disorder, including depression, major
-  depression, dysthymia, or minor depression?”
-- *Binge Drinking:* “Considering all alcoholic beverages that you drink,
-  on average, how many times per month do you have 5 (for men) or 4 (for
-  women) or more drinks on one occasion?”
 
 In 2024, what is the risk of having poor mental health outcomes based on
 state legalization?
@@ -1250,16 +1150,14 @@ brfss_data = load_clean_brfss(here::here("data", "brfss_clean_2017_2024.csv.zip"
 ## ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
 ```
 
-Filter age group \< 55 (and sports betting legal)
+Filter age group \< 50 (and sports betting legal)
 
 ``` r
 brfss_age_data = brfss_data |> 
   filter(
     age_group_5yr %in% 
-      c("18-24","25-29","30-34","35-39","40-44","45-49","50-54"),
-    sb_legal %in% c(0, 1)) #,
-    
-    #year(date) < 2020)
+      c("18-24","25-29","30-34","35-39","40-44","45-49"),
+    sb_legal %in% c(0, 1))
 ```
 
 We used a linear regression model to look at the effect of legalized
@@ -1281,94 +1179,19 @@ fit_result |>
 | term                        | estimate | std.error | p.value |
 |:----------------------------|---------:|----------:|--------:|
 | (Intercept)                 |    0.658 |     0.002 |   0.000 |
-| sexMale                     |   -0.141 |     0.002 |   0.000 |
+| sexMale                     |   -0.140 |     0.002 |   0.000 |
 | age_group_5yr25-29          |   -0.067 |     0.003 |   0.000 |
 | age_group_5yr30-34          |   -0.106 |     0.003 |   0.000 |
 | age_group_5yr35-39          |   -0.135 |     0.003 |   0.000 |
 | age_group_5yr40-44          |   -0.168 |     0.003 |   0.000 |
 | age_group_5yr45-49          |   -0.183 |     0.003 |   0.000 |
-| age_group_5yr50-54          |   -0.210 |     0.003 |   0.000 |
-| sb_legal                    |    0.054 |     0.003 |   0.000 |
-| sexMale:sb_legal            |   -0.001 |     0.002 |   0.588 |
+| sb_legal                    |    0.053 |     0.003 |   0.000 |
+| sexMale:sb_legal            |    0.002 |     0.002 |   0.425 |
 | age_group_5yr25-29:sb_legal |    0.031 |     0.005 |   0.000 |
 | age_group_5yr30-34:sb_legal |    0.030 |     0.004 |   0.000 |
-| age_group_5yr35-39:sb_legal |    0.021 |     0.004 |   0.000 |
+| age_group_5yr35-39:sb_legal |    0.022 |     0.004 |   0.000 |
 | age_group_5yr40-44:sb_legal |    0.017 |     0.004 |   0.000 |
-| age_group_5yr45-49:sb_legal |    0.002 |     0.004 |   0.714 |
-| age_group_5yr50-54:sb_legal |   -0.002 |     0.004 |   0.612 |
-
-##### Baseline differences in mental health
-
-Sex: Men have a 14.114848 percentage point lower probability of
-reporting ≥1 mentally unhealthy day compared to women (p \< 0.001).
-
-Age: All age coefficients are negative, meaning older groups report
-fewer mentally unhealthy days than 18–24-year-olds.
-
-This matches known demographic patterns typical in BRFSS mental health
-data.
-
-##### Overall effect of sports betting legality (sb_legal)
-
-Main effect: sb_legal = 0.054 0.05444(p \< 0.001)
-
-In the reference group (female, age 18–24), living in a state where
-sports betting is legal is associated with a +5.4 5.4439964 percentage
-point higher probability of reporting ≥1 mentally unhealthy day in the
-past month.
-
-##### Does the effect differ by sex?
-
-Interaction: sexMale × sb_legal = -0.001 -0.0012045 (p = 0.588
-0.5876745)
-
-There is no meaningful difference in the effect of sports betting
-legalization between men and women. The coefficient is tiny (–0.1
-percentage points) and not statistically significant.
-
-##### Differences by age group
-
-Each age interaction term tells us how much the effect of sports betting
-legality differs from the reference group (18–24).
-
-``` r
-fit_result |> 
-  filter(str_starts(term, "age_group_") & str_ends(term, "sb_legal")) |> 
-  select(term, estimate, p.value) |> 
-  mutate(
-    term = str_replace_all(term, c("age_group_5yr"="", ":sb_legal"=""))
-  ) |> 
-  rename("Age Group" = term) |> 
-  knitr::kable()
-```
-
-| Age Group |   estimate |   p.value |
-|:----------|-----------:|----------:|
-| 25-29     |  0.0308994 | 0.0000000 |
-| 30-34     |  0.0300433 | 0.0000000 |
-| 35-39     |  0.0212802 | 0.0000006 |
-| 40-44     |  0.0170216 | 0.0000537 |
-| 45-49     |  0.0015281 | 0.7136341 |
-| 50-54     | -0.0020271 | 0.6117864 |
-
-The effect is largest for adults 25-29 (0.0308994) and not significant
-for adults 45-49 and 50-54.
-
-The impact of sports betting legalization on mentally unhealthy days
-appears stronger for younger adults (25–44) but then plateaus.
-
-##### Overall Conclusions:
-
-- After adjusting for sex and age, living in a state with legal sports
-  betting is associated with higher probability of having mentally
-  unhealthy days, especially among adults aged 25–44.
-- The effect size is around 5–8 percentage points, depending on age
-  group.
-- Men and women are affected similarly.
-- Younger adults (18–24) have the highest baseline mental health risk,
-  but legalization effects are somewhat stronger for those 25–44.
-- These associations cannot establish causality (due to cross-sectional
-  BRFSS data), but they indicate a robust correlation.
+| age_group_5yr45-49:sb_legal |    0.002 |     0.004 |   0.651 |
 
 #### Predicted Probability of ≥1 Mentally Unhealthy Day
 
@@ -1376,7 +1199,7 @@ appears stronger for younger adults (25–44) but then plateaus.
 # Build prediction grid
 pred_df = expand.grid(
   sex = c("Female", "Male"),
-  age_group_5yr = c("18-24","25-29","30-34","35-39","40-44","45-49","50-54"),
+  age_group_5yr = c("18-24","25-29","30-34","35-39","40-44","45-49"),
   sb_legal = c(0, 1)   # illegal = 0, legal = 1
 )
 
@@ -1426,7 +1249,100 @@ pred_df |>
 ## generated.
 ```
 
-![](Final_Report_files/figure-gfm/unnamed-chunk-26-1.png)<!-- -->
+![](Final_Report_files/figure-gfm/unnamed-chunk-25-1.png)<!-- -->
+
+# 7. Discussion
+
+#### What were your findings? Are they what you expect? What insights into the data can you make?
+
+Among BRFSS participants in 2024 between the ages of 18 and 29, those
+who resided in states with legalized sports betting had:
+
+- 1.06x risk of having at least 1 day of poor physical health
+- 1.05x risk of having at least 1 day of poor mental health
+- 1.07x risk of having depression
+- 1.15x risk of binge drinking
+
+compared to those residing in states where sports betting is not legal.
+Each of these results also show that there is a statistically
+significant relationship between the status of sports betting
+legalization and health outcomes:
+
+- At least 1 day of poor physical health: 5.08e-05
+- At least 1 day of poor mental health: 1.61e-08
+- Depression: 5.17e-04
+- Binge Drinking: 1.75e-10
+
+##### Baseline differences in mental health
+
+Sex: Men have a 14.0183765 percentage point lower probability of
+reporting ≥1 mentally unhealthy day compared to women (p \< 0.001).
+
+Age: All age coefficients are negative, meaning older groups report
+fewer mentally unhealthy days than 18–24-year-olds.
+
+This matches known demographic patterns typical in BRFSS mental health
+data.
+
+##### Overall effect of sports betting legality (sb_legal)
+
+Main effect: sb_legal = 0.054 0.0526151(p \< 0.001)
+
+In the reference group (female, age 18–24), living in a state where
+sports betting is legal is associated with a +5.4 5.2615068 percentage
+point higher probability of reporting ≥1 mentally unhealthy day in the
+past month.
+
+##### Does the effect differ by sex?
+
+Interaction: sexMale × sb_legal = -0.001 0.0019712 (p = 0.588 0.4254692)
+
+There is no meaningful difference in the effect of sports betting
+legalization between men and women. The coefficient is tiny (–0.1
+percentage points) and not statistically significant.
+
+##### Differences by age group
+
+Each age interaction term tells us how much the effect of sports betting
+legality differs from the reference group (18–24).
+
+``` r
+fit_result |> 
+  filter(str_starts(term, "age_group_") & str_ends(term, "sb_legal")) |> 
+  select(term, estimate, p.value) |> 
+  mutate(
+    term = str_replace_all(term, c("age_group_5yr"="", ":sb_legal"=""))
+  ) |> 
+  rename("Age Group" = term) |> 
+  knitr::kable()
+```
+
+| Age Group |  estimate |   p.value |
+|:----------|----------:|----------:|
+| 25-29     | 0.0310474 | 0.0000000 |
+| 30-34     | 0.0302668 | 0.0000000 |
+| 35-39     | 0.0215464 | 0.0000004 |
+| 40-44     | 0.0173318 | 0.0000409 |
+| 45-49     | 0.0018894 | 0.6508026 |
+
+The effect is largest for adults 25-29 (0.0310474) and not significant
+for adults 45-49 and 50-54.
+
+The impact of sports betting legalization on mentally unhealthy days
+appears stronger for younger adults (25–44) but then plateaus.
+
+##### Overall Conclusions:
+
+- After adjusting for sex and age, living in a state with legal sports
+  betting is associated with higher probability of having mentally
+  unhealthy days, especially among adults aged 25–44.
+- The effect size is around 5–8 percentage points, depending on age
+  group.
+- Men and women are affected similarly.
+- Younger adults (18–24) have the highest baseline mental health risk,
+  but legalization effects are somewhat stronger for those 25–44.
+- These associations cannot establish causality (due to cross-sectional
+  BRFSS data), but they indicate a robust correlation.
 
 The graph shows how the predicted probability of reporting at least one
 mentally unhealthy day in the past month varies across age groups, sex,
@@ -1467,5 +1383,5 @@ and whether sports betting is legal in the respondent’s state.
 Sports betting legalization is associated with a higher probability of
 experiencing mentally unhealthy days, especially among adults aged
 25–44, and this pattern is similar for both men and women. The effect
-does not appear uniform across age groups, indicating a meaningful age ×
-policy interaction.
+does not appear uniform across age groups, indicating a meaningful
+interaction between age and policy.
