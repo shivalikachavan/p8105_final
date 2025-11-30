@@ -3,8 +3,6 @@ P8105 Final Report
 Shivalika Chavan, Angelica Bailey, Julia Gray
 2025-11-28
 
-tabbable sections
-
 ``` r
 knitr::opts_chunk$set(echo = TRUE, collapse = TRUE)
 
@@ -144,6 +142,8 @@ Our analyses focuses on the following cleaned variable groups:
   used (1 if the participant has the outcome, 0 if not).
 - Predictors: any demographic variables (sex, age group, education
   level, etc.)
+
+The final number of observations used in the BRFSS dataset were 2749477.
 
 # 5. Exploratory analysis
 
@@ -1255,6 +1255,45 @@ pred_df |>
 
 #### What were your findings? Are they what you expect? What insights into the data can you make?
 
+Overall, we found a significant relationship between legalization of
+sports betting and poor physical/mental health. It is important to note
+that in our statistical analyses, even if the effect size was small, we
+still had a small p-value. This is likely due to the size of the BRFSS
+dataset (~2.7 million observations).
+
+Our tests of proportion, which first examined the overall trend in the
+four health outcomes between 2017 and 2024, established two trends at
+the national scale. First, there is a clear increase in the rate of
+survey participants reporting at least one poor physical or mental
+health day in almost all states. This is an important benchmark for
+effects we observed later on. However, rates of depressive disorders
+showed a slight increase and rates in binge drinking remained the same
+across this period.
+
+To isolate the impact of the change in sport betting legalization, we
+performed additional tests of proportion using each state’s date of
+legalization as the inflection point. These results largely mirrored the
+overall trends observed nationally between 2017 and 2024. This implies
+that the impact of sports betting legalization in a particular state did
+not deviate from the broader trend observed over time. One important
+note is that this period includes the COVID-19 pandemic, which likely
+had effects on health outcomes in the US and overlaps with the dates
+that several states legalized sports betting.
+
+Knowing that more young adults participate in sports betting, we further
+filtered the data for participants under 50 years old. In this subset,
+the overall rate of mental health and depressive disorders was higher
+than the general population. This makes sense intuitively. However, the
+change in the rate after legalization was similar to the overall change.
+
+When put together, these tests of proportion suggest that health
+outcomes have worsened since 2017 across the US overall. These result do
+not show that sports betting legalization changes these trends beyond
+what is observed temporally.
+
+However, this conclusion is modified when we look at the relative risk
+of adverse health outcomes in 2024:
+
 Among BRFSS participants in 2024 between the ages of 18 and 29, those
 who resided in states with legalized sports betting had:
 
@@ -1273,35 +1312,23 @@ legalization and health outcomes:
 - Depression: 5.17e-04
 - Binge Drinking: 1.75e-10
 
-##### Baseline differences in mental health
+The regression model showed baseline differences in mental health
+between sexes and age groups as well as the effects of legalized sports
+gambling. Men have a 14.02 percentage point lower probability of
+reporting ≥1 mentally unhealthy day compared to women (p \< 0.001). All
+age coefficients are negative, meaning older groups report fewer
+mentally unhealthy days than 18–24-year-olds, This matches known
+demographic patterns typical in BRFSS mental health data.
 
-Sex: Men have a 14.0183765 percentage point lower probability of
-reporting ≥1 mentally unhealthy day compared to women (p \< 0.001).
-
-Age: All age coefficients are negative, meaning older groups report
-fewer mentally unhealthy days than 18–24-year-olds.
-
-This matches known demographic patterns typical in BRFSS mental health
-data.
-
-##### Overall effect of sports betting legality (sb_legal)
-
-Main effect: sb_legal = 0.054 0.0526151(p \< 0.001)
-
-In the reference group (female, age 18–24), living in a state where
-sports betting is legal is associated with a +5.4 5.2615068 percentage
-point higher probability of reporting ≥1 mentally unhealthy day in the
-past month.
-
-##### Does the effect differ by sex?
-
-Interaction: sexMale × sb_legal = -0.001 0.0019712 (p = 0.588 0.4254692)
+The overall effect of sports betting legality (`sb_legal`) was 0.054
+0.053 (p \< 0.001) 8.06e-55. In the reference group (female, age 18–24),
+living in a state where sports betting is legal is associated with a
++5.4 5.2615068 percentage point higher probability of reporting ≥1
+mentally unhealthy day in the past month.
 
 There is no meaningful difference in the effect of sports betting
-legalization between men and women. The coefficient is tiny (–0.1
-percentage points) and not statistically significant.
-
-##### Differences by age group
+legalization between men and women. The coefficient is tiny (0.0019712)
+and not statistically significant (p = 0.425.)
 
 Each age interaction term tells us how much the effect of sports betting
 legality differs from the reference group (18–24).
@@ -1314,22 +1341,59 @@ fit_result |>
     term = str_replace_all(term, c("age_group_5yr"="", ":sb_legal"=""))
   ) |> 
   rename("Age Group" = term) |> 
-  knitr::kable()
+  knitr::kable(digits=3)
 ```
 
-| Age Group |  estimate |   p.value |
-|:----------|----------:|----------:|
-| 25-29     | 0.0310474 | 0.0000000 |
-| 30-34     | 0.0302668 | 0.0000000 |
-| 35-39     | 0.0215464 | 0.0000004 |
-| 40-44     | 0.0173318 | 0.0000409 |
-| 45-49     | 0.0018894 | 0.6508026 |
+| Age Group | estimate | p.value |
+|:----------|---------:|--------:|
+| 25-29     |    0.031 |   0.000 |
+| 30-34     |    0.030 |   0.000 |
+| 35-39     |    0.022 |   0.000 |
+| 40-44     |    0.017 |   0.000 |
+| 45-49     |    0.002 |   0.651 |
 
 The effect is largest for adults 25-29 (0.0310474) and not significant
-for adults 45-49 and 50-54.
+for adults 45-49. The impact of sports betting legalization on mentally
+unhealthy days appears stronger for younger adults (25–44) but then
+plateaus. This result can also be seen in the predicted probabilty of
+having 1 or more bad mental health days.
 
-The impact of sports betting legalization on mentally unhealthy days
-appears stronger for younger adults (25–44) but then plateaus.
+The results showed how the predicted probability of reporting at least
+one mentally unhealthy day in the past month varies across age groups,
+sex, and whether sports betting is legal in the respondent’s state. When
+sports betting is not legal, women consistently report higher rates of
+mentally unhealthy days than men across all age groups. Both sexes show
+a steady decline in mentally unhealthy days as age increases, with
+18–24-year-olds exhibiting the highest risk and 45–50-year-olds the
+lowest.
+
+The effect of sports betting legalization is shown by the separation
+between the dashed lines (SB legal) and the solid lines. Across all age
+groups, the dashed lines lie above the corresponding solid lines, which
+means sports betting legalization is associated with a higher
+probability of reporting mentally unhealthy days. It also shows the size
+of this increase varies by age and the difference is largest among young
+and early-mid adults, especially ages 25–44.
+
+The vertical distance between male and female lines remains fairly
+constant regardless of legalization status, which indicates women
+consistently report more mentally unhealthy days than men. The effect of
+sports betting legalization is similar for both sexes (this supports the
+non-significant sex × legalization interaction in the regression model).
+
+The graph visually confirms the pattern in the coefficients: among
+younger adults (25–44), the increase associated with sports betting
+legalization is noticeably larger and this decreases with age. This
+suggests that younger and mid-age adults may be more sensitive to
+environmental or policy changes related to gambling or these age groups
+may participate more in gambling or be more exposed to advertising or
+technology that connects them to sports betting markets.
+
+Sports betting legalization is associated with a higher probability of
+experiencing mentally unhealthy days, especially among adults aged
+25–44, and this pattern is similar for both men and women. The effect
+does not appear uniform across age groups, indicating a meaningful
+interaction between age and policy.
 
 ##### Overall Conclusions:
 
@@ -1343,45 +1407,3 @@ appears stronger for younger adults (25–44) but then plateaus.
   but legalization effects are somewhat stronger for those 25–44.
 - These associations cannot establish causality (due to cross-sectional
   BRFSS data), but they indicate a robust correlation.
-
-The graph shows how the predicted probability of reporting at least one
-mentally unhealthy day in the past month varies across age groups, sex,
-and whether sports betting is legal in the respondent’s state.
-
-- Baseline trends:
-  - When sports betting is not legal, women consistently report higher
-    rates of mentally unhealthy days than men across all age groups.
-  - Both sexes show a steady decline in mentally unhealthy days as age
-    increases, with 18–24-year-olds exhibiting the highest risk and
-    50–54-year-olds the lowest.
-- Effect of sports betting legalization:
-  - Across nearly all age groups, the dashed lines (SB legal) lie above
-    the corresponding solid lines (SB illegal) which means sports
-    betting legalization is associated with a higher probability of
-    reporting mentally unhealthy days.
-  - The size of this increase varies by age
-  - The difference is largest among young and early-mid adults,
-    especially ages 25–44.
-- Differences between men and women
-  - The vertical distance between male and female lines remains fairly
-    constant regardless of legalization status, which indicates women
-    consistently report more mentally unhealthy days than men.
-  - The effect of sports betting legalization is similar for both sexes
-    (supports the non-significant sex × legalization interaction in the
-    model).
-- Age × legalization interaction
-  - The graph visually confirms the pattern in the coefficients:
-  - Among younger adults (25–44), the increase associated with sports
-    betting legalization is noticeably larger.
-  - By 45–54, the effect is small or negligible.
-  - This suggests that younger and mid-age adults may be more sensitive
-    to environmental or policy changes related to gambling or these age
-    groups may participate more in gambling or be more exposed to
-    advertising or technology that connects them to sports betting
-    markets.
-
-Sports betting legalization is associated with a higher probability of
-experiencing mentally unhealthy days, especially among adults aged
-25–44, and this pattern is similar for both men and women. The effect
-does not appear uniform across age groups, indicating a meaningful
-interaction between age and policy.
