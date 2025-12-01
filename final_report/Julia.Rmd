@@ -33,6 +33,7 @@ state_pop = read_csv(here("data", "state_population_census.csv"))
 
 # 1. Motivation
 #### Provide an overview of the project goals and motivation.
+TEST
 
 # 2. Related work
 Anything that inspired you, such as a paper, a web site, or something we discussed in class.
