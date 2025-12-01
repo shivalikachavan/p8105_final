@@ -42,10 +42,10 @@ theme_set(theme_minimal() + theme(legend.position = "bottom"))
 
 The rapid expansion of legalized sports gambling in the United States
 has reshaped the landscape of professional sports. Since the Supreme
-Court ruled in 2018 to repeal of Professional and Amateur Sports
+Court ruled in 2018 to repeal the Professional and Amateur Sports
 Protection Act (PASPA), 39 states have legalized some form of sports
-wagering, generating billions in annual handle (total amount wagered).
-It feels like there is a new sports gambling scandal every month, most
+betting, generating billions in annual handle (total amount wagered). It
+feels like there is a new sports gambling scandal every month, most
 recently the [NBA gambling
 scandal](https://www.nytimes.com/2025/10/23/nyregion/nba-gambling-scandal-explained.html)
 and an ongoing debate over [NCAA
@@ -53,57 +53,64 @@ rules](https://www.espn.com/college-sports/story/_/id/46762598/ncaa-delays-rule-
 regarding athlete gambling, involving the increasingly popular
 player-specific proposition “prop” bets. Despite industry claims that
 legalization promotes consumer protections and tax revenue, concerns
-persist that widespread access may increase gambling participation,
-financial harm, and mental health burdens.
+persist that widespread access may lead to an increase in gambling
+participation and adverse financial and health outcomes.
 
 This project, “The House Always Wins? Exploring the Societal Costs of
 Legal Sports Gambling,” investigates the public health implications of
-this policy shift. Building on prior scholarship, we integrate BRFSS
-data, state-level gambling policy information, and market activity to
-examine how legalization relates to self-reported mental health outcomes
-and population-level risk profiles. By combining behavioral surveillance
+this policy shift. Building on prior scholarship, we integrate
+Behavioral Risk Factor Surveillance System (BRFSS) data, state-level
+gambling policy information, and market activity to examine how
+legalization relates to self-reported mental health outcomes and
+population-level risk profiles. By combining behavioral surveillance
 data with policy variation across states, the project aims to generate
-empirical evidence on how sports gambling laws shape population health.
+empirical evidence on how sports gambling laws trend with population
+health.
 
 # 2. Related work
 
-Recent studies have begun to quantify the broader consequences of
-legalized sports gambling. [Couture, Cross, and Wu
+Recent studies have quantified the broader consequences of legalized
+sports gambling. [Couture, Cross, and Wu
 (2024)](https://ssrn.com/abstract=4865678) used BRFSS data to examine
 whether sports betting is associated with poorer mental health, focusing
 specifically on self-reported mentally unhealthy days in states that
 legalized before the COVID-19 pandemic. They found that the impact of
 legalized sports gambling on the probability of reporting a poor mental
-health day was stratified by sex and age with Males 20-34 were found to
-be most at risk with an increased likelihood of 3.8%. [Hollenbeck,
-Larson and Proserpio (2025)](https://ssrn.com/abstract=4903302)
-complements this by analyzing the financial consequences of legalized
-sports gambling, documenting increases in consumer losses and household
-financial strain following legalization. Although differing in outcomes,
-both papers leverage the staggered, state-by-state rollout of
-legalization to identify causal effects. Together, these findings
-suggest that both mental health and financial well-being may be
-adversely affected by the expansion of sports wagering, underscoring the
-need for broader, population-level analyses such as the one undertaken
-in this project.
+health day was stratified by sex and age. Men between the ages of 20-34
+were found to be most at risk with an increased likelihood of 3.8%.
+[Hollenbeck, Larson and Proserpio
+(2025)](https://ssrn.com/abstract=4903302) complements this by analyzing
+the financial consequences of legalized sports gambling, documenting
+increases in consumer losses and household financial strain following
+legalization. Although differing in outcomes, both papers leverage the
+staggered, state-by-state rollout of legalization to identify causal
+effects. Together, these findings suggest that both mental health and
+financial well-being may be adversely affected by the expansion of
+sports wagering, underscoring the need for broader, population-level
+analyses such as the one undertaken in this project.
 
 # 3. Initial questions
 
-#### What questions are you trying to answer? How did these questions evolve over the course of the project? What new questions did you consider in the course of your analysis?
+Initial Questions:
 
-Initial Questions: 1. What are the trends in the amount of money wagered
-(handle) across states that have legalized sports gambling? 2. Does
-legalized sports gambling have a negative effect on public health
-outcomes? This involves analyzing changes in rates of depression (or
-other mental disorders), domestic violence, and substance abuse in
-states where sports betting is legal. 3. Using the each state’s
-legalization date (if one exists) as the inflection point, are these
-health outcomes stratified by demographics (age, sex, race, tax bracket,
-and education level) and state?
+1.  What are the trends in the amount of money wagered (handle) across
+    states that have legalized sports gambling?
 
-New Questions: 1. How are health outcomes associated with each other?
-Are there patterns between variables that may help inform what to
-control for in future analyses?
+2.  Does legalized sports gambling have a negative effect on public
+    health outcomes? This involves analyzing changes in rates of
+    depression (or other mental disorders), domestic violence, and
+    substance abuse in states where sports betting is legal.
+
+3.  Using the each state’s legalization date (if one exists) as the
+    inflection point, are these health outcomes stratified by
+    demographics (age, sex, race, tax bracket, and education level) and
+    state?
+
+New Questions:
+
+1.  How are health outcomes associated with each other? Are there
+    patterns between variables that may help inform what to control for
+    in future analyses?
 
 # 4. Data
 
@@ -138,36 +145,59 @@ aggregate data for all states. There were a few states with no data
 Across the years, there have been many iterations of the BRFSS survey,
 in terms of variable coding and questions asked. As a result, extensive
 cleaning and standardization was required. This process was handled with
-several `source` files. More detailed explanations of this process are
-available in `brfss_data_exploration.Rmd` and `brfss_data_cleaning.Rmd`.
+several
+[source](https://github.com/shivalikachavan/p8105_final/tree/main/source)
+files. More detailed explanations of this process are available in
+[brfss_data_exploration.Rmd](https://github.com/shivalikachavan/p8105_final/blob/main/eda/brfss_data_exploration.Rmd)
+and
+[brfss_data_cleaning.Rmd](https://github.com/shivalikachavan/p8105_final/blob/main/eda/brfss_data_cleaning.Rmd).
 
-- `standardize_brfss_variable.R`: This function renames variables that
-  have more than one version of the same variable (e.g. `HLTHPL1` and
-  `HLTHPL2`). Seeing that the variables differed in name only (the
-  responses were coded in the same way), this was handled by renaming
-  different versions to the single standardized name.
-  (e.g. `hlthpl_standard`).
-- `filter_brfss_data.R`: This function keeps the key variables for our
-  study (unique survey identifiers, demographic/predictor variables,
-  health/financial outcomes variables). It also filters for completed
-  interviews (`dispcode = 1100`) and converts the date of the interview
-  to a Date type variable.
-- `load_clean_brfss_data.R`: This function is used to load the cleaned
-  data set into R by recoding variables (e.g. `1 ~ "Male"`), and
-  connects the date of each interview to the status of legalization in
-  that state. This `sb_legal` treatment variable is added by merging
-  with `state_legalization_dates.csv`.
+- [standardize_brfss_variable.R](https://github.com/shivalikachavan/p8105_final/blob/main/source/standardize_brfss_variable.R):
+  This function renames variables that have more than one version of the
+  same variable (e.g. `HLTHPL1` and `HLTHPL2`). Seeing that the
+  variables differed in name only (the responses were coded in the same
+  way), this was handled by renaming different versions to the single
+  standardized name. (e.g. `hlthpl_standard`).
+- [filter_brfss_data.R](https://github.com/shivalikachavan/p8105_final/blob/main/source/filter_brfss_data.R):
+  This function keeps the key variables for our study (unique survey
+  identifiers, demographic/predictor variables, health/financial
+  outcomes variables). It also filters for completed interviews
+  (`dispcode = 1100`) and converts the date of the interview to a Date
+  type variable.
+- [load_clean_brfss_data.R](https://github.com/shivalikachavan/p8105_final/blob/main/source/load_clean_brfss.R):
+  This function is used to load the cleaned data set into R by recoding
+  variables (e.g. `1 ~ "Male"`), and connects the date of each interview
+  to the status of legalization in that state. This `sb_legal` treatment
+  variable is added by merging with
+  [state_legalization_dates.csv](https://github.com/shivalikachavan/p8105_final/blob/main/data/legal_sports_report/state_legalization_dates.csv).
 
 Our analyses focuses on the following cleaned variable groups:
 
 - Treatment Variable: `sb_legal` (`1` if the interview was conducted
   after the state legalized sports betting (rounded to the first of the
-  motnh), `0` if it was before, and `NA` if the state has yet to
+  month), `0` if it was before, and `NA` if the state has yet to
   legalize sport betting)
+
 - Outcome Variables: `mental_health_not_good_days`,
   `physical_health_not_good_days`, `depressive_disorder`, and
   `binge_drink`. In some cases, a binary version of these variables was
-  used (1 if the participant has the outcome, 0 if not).
+  used (1 if the participant has the outcome, 0 if not):
+
+  - *At least 1 poor mental health day*: “Now thinking about your mental
+    health, which includes stress, depression, and problems with
+    emotions, for how many days during the past 30 days was your mental
+    health not good?”
+  - *At least 1 poor physical health day*: “Now thinking about your
+    physical health, which includes physical illness and injury, for how
+    many days during the past 30 days was your physical health not
+    good?”
+  - *Depression*: “Has a doctor or other health professional ever told
+    you that you had a depressive disorder, including depression, major
+    depression, dysthymia, or minor depression?”
+  - *Binge Drinking:* “Considering all alcoholic beverages that you
+    drink, on average, how many times per month do you have 5 (for men)
+    or 4 (for women) or more drinks on one occasion?”
+
 - Predictors: any demographic variables (sex, age group, education
   level, etc.)
 
@@ -569,22 +599,6 @@ outcome variable. This also follows what Couture, et. al. used in their
 analysis. It also simplified statistical tests that we decided to do
 later on.
 
-We are using the 4 following health outcomes:
-
-- *At least 1 poor mental health day*: “Now thinking about your mental
-  health, which includes stress, depression, and problems with emotions,
-  for how many days during the past 30 days was your mental health not
-  good?”
-- *At least 1 poor physical health day*: “Now thinking about your
-  physical health, which includes physical illness and injury, for how
-  many days during the past 30 days was your physical health not good?”
-- *Depression*: “Has a doctor or other health professional ever told you
-  that you had a depressive disorder, including depression, major
-  depression, dysthymia, or minor depression?”
-- *Binge Drinking:* “Considering all alcoholic beverages that you drink,
-  on average, how many times per month do you have 5 (for men) or 4 (for
-  women) or more drinks on one occasion?”
-
 ##### Correlation Analysis
 
 To understand relationships among the health outcome variables in the
@@ -675,9 +689,9 @@ cor(brfss_all,
     lab = TRUE,
     lab_size = 2.5,
     tl.cex = 10,
-    title = "Correlations",
-    theme(plot.title = element_text(hjust = 0.5))
-  )
+    title = "Correlations"
+  ) +
+  theme(plot.title = element_text(hjust = 0.5))
 ```
 
 ![](Final_Report_files/figure-gfm/unnamed-chunk-12-1.png)<!-- -->
@@ -698,18 +712,19 @@ days.
 On the other hand, `heavy_drink` and `binge_drink` showed weak
 correlations with most other health outcomes.
 
-\* BRFSS contains a variable general_health which is a Likert scale from
-1-6 with 1 being “Good Health” and 6 being “Poor Health.” There is also
-a refactored general_health column with 1 being “Good Health” and 2
-being “Poor Health.” `general_health_refactored` shows negative
+Note: BRFSS contains a variable `general_health` which is a Likert scale
+from 1-6 with 1 being “Good Health” and 6 being “Poor Health.” There is
+also a `general_health_refactored` column with 1 being “Good Health” and
+2 being “Poor Health.” `general_health_refactored` shows negative
 correlations with variables like `physical_health` and `mental_health`.
 As general health gets better (lower score), the number of bad health
 days goes up. This is an unexpected result. We can see that
-general_health has little correlation between most other health
-outcomes, which was surprising. We assume these trends we see in
-`general_health_refactored` may not be accurate as `general_health`
-shows minimal correlation. If we were to do future analyses, we would
-want to use the narrowly defined variable `general_health.`
+`general_health` has little correlation between most other health
+outcomes, which was surprising. We may be seeing these trends since
+`general_health_refactored` has fewer, more broadly defined categories.
+The more narrowly defined `general_health` shows minimal correlation. If
+we were to do future analyses, we would want to use the narrowly defined
+variable `general_health.`
 
 ##### Distribution of Primary Health Outcomes by Demographic Variables
 
@@ -792,6 +807,20 @@ plot_physical_health = function(brfss_data, demo_var, plot_title) {
 plot_depression = function(demo_var, plot_title) {
   
     brfss_data |> 
+    mutate(
+      income_level = factor(
+        income_level,
+        levels = c(
+          "Less than $10,000",
+          "$10,000 to < $15,000",
+          "$15,000 to < $20,000",
+          "$20,000 to < $25,000",
+          "$25,000 to < $35,000",
+          "$35,000 to < $50,000",
+          "$50,000 to < $75,000",
+          "$75,000 or more")
+        )
+      ) |> 
     drop_na(depressive_disorder) |> 
     drop_na(.data[[demo_var]]) |> 
   
@@ -852,7 +881,7 @@ plot_mental_health(
 
 The 18-24 and 25-29 age groups have the largest proportion of
 individuals reporting 1-13 and 14+ bad mental health days. Younger
-adults experience the highest frequency of bad mental health days, while
+adults report the highest frequency of bad mental health days, while
 older adults report the lowest.
 
 Looking at the distribution of bad physical health days by sex:
@@ -889,7 +918,7 @@ plot_depression(
 
 ![](Final_Report_files/figure-gfm/unnamed-chunk-16-1.png)<!-- -->
 
-The lowest-income groups (less than \$10,000 and \$10,000–\<\$15,000)
+The lowest-income groups (less than \$10,000 and \$10,000 to \<\$15,000)
 have the highest proportions of individuals reporting a depressive
 disorder. As income decreases, the proportion of respondents with
 depressive disorder increases.
@@ -1281,8 +1310,6 @@ pred_df |>
 
 # 7. Discussion
 
-#### What were your findings? Are they what you expect? What insights into the data can you make?
-
 Overall, we found a significant relationship between legalization of
 sports betting and poor physical/mental health. It is important to note
 that in our statistical analyses, even if the effect size was small, we
@@ -1315,9 +1342,9 @@ than the general population. This makes sense intuitively. However, the
 change in the rate after legalization was similar to the overall change.
 
 When put together, these tests of proportion suggest that health
-outcomes have worsened since 2017 across the US overall. These result do
-not show that sports betting legalization changes these trends beyond
-what is observed temporally.
+outcomes have worsened since 2017 across the US overall. These results
+do not show that sports betting legalization changes these trends beyond
+what is observed temporally at the national level.
 
 However, this conclusion is modified when we look at the relative risk
 of adverse health outcomes in 2024:
@@ -1335,10 +1362,10 @@ Each of these results also show that there is a statistically
 significant relationship between the status of sports betting
 legalization and health outcomes:
 
-- At least 1 day of poor physical health: 5.08e-05
-- At least 1 day of poor mental health: 1.61e-08
-- Depression: 5.17e-04
-- Binge Drinking: 1.75e-10
+- At least 1 day of poor physical health: p = 5.08e-05
+- At least 1 day of poor mental health: p = 1.61e-08
+- Depression: p = 5.17e-04
+- Binge Drinking: p = 1.75e-10
 
 The regression model showed baseline differences in mental health
 between sexes and age groups as well as the effects of legalized sports
@@ -1348,11 +1375,11 @@ age coefficients are negative, meaning older groups report fewer
 mentally unhealthy days than 18–24-year-olds, This matches known
 demographic patterns typical in BRFSS mental health data.
 
-The overall effect of sports betting legality (`sb_legal`) was 0.054
-0.053 (p \< 0.001) 8.06e-55. In the reference group (female, age 18–24),
-living in a state where sports betting is legal is associated with a
-+5.4 5.2615068 percentage point higher probability of reporting ≥1
-mentally unhealthy day in the past month.
+The overall effect of sports betting legality (`sb_legal`) was 0.053 p =
+8.06e-55. In the reference group (female, age 18–24), living in a state
+where sports betting is legal is associated with a 5.262 percentage
+point higher probability of reporting ≥1 mentally unhealthy day in the
+past month.
 
 There is no meaningful difference in the effect of sports betting
 legalization between men and women. The coefficient is tiny (0.0019712)
@@ -1431,7 +1458,7 @@ unhealthy days, especially among adults aged 25–44. The effect size is
 around 5–8 percentage points, depending on age group. Men and women are
 affected similarly, which doesn’t align with the Couture et
 al. findings, likely because we were looking at a larger dataset which
-included post-COVID observations. Younger adults (18–24) have the
+included post-COVID-19 observations. Younger adults (18–24) have the
 highest baseline mental health risk, but legalization effects are
 somewhat stronger for those 25–44. These associations cannot establish
 causality (due to cross-sectional BRFSS data), but they indicate a
@@ -1447,10 +1474,10 @@ may introduce recall bias and response bias. Respondents may
 inaccurately recall their health over the past 30 days and under-report
 sensitive behaviors due to stigma.
 
-The study period includes the COVID pandemic which potentially serves as
-a major confounding event. Changes in health outcomes related to the
+The study period includes the COVID-19 pandemic which potentially serves
+as a major confounding event. Changes in health outcomes related to the
 pandemic may coincide with legalization, confounding associations. Our
-exposure variable, sb_legal does not account for individual sports
+exposure variable, `sb_legal` does not account for individual sports
 betting behavior or the level/intensity of exposure, therefore, which
 only allowed us to address population-level associations based on
 legalization exposure.
