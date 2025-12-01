@@ -40,24 +40,52 @@ theme_set(theme_minimal() + theme(legend.position = "bottom"))
 
 # 1. Motivation
 
-#### Provide an overview of the project goals and motivation.
-
-Following the [2018 Supreme Court
-decision](https://www.klgates.com/Supreme-Court-Strikes-Down-Ban-on-Sports-Wagering-05-18-2018)
-to rescind the Professional and Amateur Sports Protection Act (PASPA),
-39 states have legalized sports gambling, and we would like to look at
-the public health effects of this decision. More recently, there was a
-lot of media buzz over the [NBA gambling
+The rapid expansion of legalized sports gambling in the United States
+has reshaped the landscape of professional sports. Since the Supreme
+Court ruled in 2018 to repeal of Professional and Amateur Sports
+Protection Act (PASPA), 39 states have legalized some form of sports
+wagering, generating billions in annual handle (total amount wagered).
+It feels like there is a new sports gambling scandal every month, most
+recently the [NBA gambling
 scandal](https://www.nytimes.com/2025/10/23/nyregion/nba-gambling-scandal-explained.html)
 and an ongoing debate over [NCAA
 rules](https://www.espn.com/college-sports/story/_/id/46762598/ncaa-delays-rule-change-permitting-college-athletes-bet-professional-sports)
 regarding athlete gambling, involving the increasingly popular
-player-specific proposition “prop” bets.
+player-specific proposition “prop” bets. Despite industry claims that
+legalization promotes consumer protections and tax revenue, concerns
+persist that widespread access may increase gambling participation,
+financial harm, and mental health burdens.
+
+This project, “The House Always Wins? Exploring the Societal Costs of
+Legal Sports Gambling,” investigates the public health implications of
+this policy shift. Building on prior scholarship, we integrate BRFSS
+data, state-level gambling policy information, and market activity to
+examine how legalization relates to self-reported mental health outcomes
+and population-level risk profiles. By combining behavioral surveillance
+data with policy variation across states, the project aims to generate
+empirical evidence on how sports gambling laws shape population health.
 
 # 2. Related work
 
-Anything that inspired you, such as a paper, a web site, or something we
-discussed in class.
+Recent studies have begun to quantify the broader consequences of
+legalized sports gambling. [Couture, Cross, and Wu
+(2024)](https://ssrn.com/abstract=4865678) used BRFSS data to examine
+whether sports betting is associated with poorer mental health, focusing
+specifically on self-reported mentally unhealthy days in states that
+legalized before the COVID-19 pandemic. They found that the impact of
+legalized sports gambling on the probability of reporting a poor mental
+health day was stratified by sex and age with Males 20-34 were found to
+be most at risk with an increased likelihood of 3.8%. [Hollenbeck,
+Larson and Proserpio (2025)](https://ssrn.com/abstract=4903302)
+complements this by analyzing the financial consequences of legalized
+sports gambling, documenting increases in consumer losses and household
+financial strain following legalization. Although differing in outcomes,
+both papers leverage the staggered, state-by-state rollout of
+legalization to identify causal effects. Together, these findings
+suggest that both mental health and financial well-being may be
+adversely affected by the expansion of sports wagering, underscoring the
+need for broader, population-level analyses such as the one undertaken
+in this project.
 
 # 3. Initial questions
 
@@ -1395,15 +1423,45 @@ experiencing mentally unhealthy days, especially among adults aged
 does not appear uniform across age groups, indicating a meaningful
 interaction between age and policy.
 
-##### Overall Conclusions:
+#### Overall Conclusions
 
-- After adjusting for sex and age, living in a state with legal sports
-  betting is associated with higher probability of having mentally
-  unhealthy days, especially among adults aged 25–44.
-- The effect size is around 5–8 percentage points, depending on age
-  group.
-- Men and women are affected similarly.
-- Younger adults (18–24) have the highest baseline mental health risk,
-  but legalization effects are somewhat stronger for those 25–44.
-- These associations cannot establish causality (due to cross-sectional
-  BRFSS data), but they indicate a robust correlation.
+After adjusting for sex and age, living in a state with legal sports
+betting is associated with higher probability of having mentally
+unhealthy days, especially among adults aged 25–44. The effect size is
+around 5–8 percentage points, depending on age group. Men and women are
+affected similarly, which doesn’t align with the Couture et
+al. findings, likely because we were looking at a larger dataset which
+included post-COVID observations. Younger adults (18–24) have the
+highest baseline mental health risk, but legalization effects are
+somewhat stronger for those 25–44. These associations cannot establish
+causality (due to cross-sectional BRFSS data), but they indicate a
+robust correlation.
+
+##### Limitations
+
+We are not following the same participants over time which prevents
+establishing causal relationships. We cannot determine whether the
+legalization of sports betting directly contributed to worsening health
+outcomes. Also, the measure of health outcomes are self-reported which
+may introduce recall bias and response bias. Respondents may
+inaccurately recall their health over the past 30 days and under-report
+sensitive behaviors due to stigma.
+
+The study period includes the COVID pandemic which potentially serves as
+a major confounding event. Changes in health outcomes related to the
+pandemic may coincide with legalization, confounding associations. Our
+exposure variable, sb_legal does not account for individual sports
+betting behavior or the level/intensity of exposure, therefore, which
+only allowed us to address population-level associations based on
+legalization exposure.
+
+##### Additional Analyses
+
+There are many additional analyses that could be done on the dataset,
+given more time. This includes finely tuning the regression model and
+addressing confounding factors, like COVID. We observed that mental
+health outcomes decreased overall from 2017-2024, but establishing a
+causal effect of sports betting would require further analysis. We did
+not get a chance to look at the effect of online vs. retail-only sports
+betting legalization (which varies state-to-state), but this would be
+another interesting policy effect to examine.
