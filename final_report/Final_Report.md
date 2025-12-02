@@ -34,8 +34,6 @@ state_pop = read_csv(here("data", "state_population_census.csv"))
 years_in_data = unique(year(pull(sb_rev_by_month, month)))
 
 outcome_vars = c("any_physical_health_not_good_days", "any_mental_health_not_good_days", "has_depressive_disorder", "has_binge_drink")
-
-theme_set(theme_minimal() + theme(legend.position = "bottom"))
 ```
 
 # 1. Motivation
@@ -240,6 +238,111 @@ sb_rev_by_month |>
 
 ![](Final_Report_files/figure-gfm/unnamed-chunk-1-1.png)<!-- -->
 
+The plot shows handle going up with the number of states that have
+legalized sports betting. It also clearly shows strong cyclical trends
+in total handle, suggesting that the volume of betting is highly
+sensitive to the sports calendar.
+
+##### Understanding Spikes in Sports Betting Handle
+
+In addition to the BRFSS survey, we looked at sports betting data (Total
+Handle) to understand the cyclic nature of the betting market that could
+influence mental health outcomes. The purpose is to determine if the
+spikes in betting activity align with major sports seasons.
+
+###### NFL Season
+
+``` r
+nfl_event_dates = tibble(
+  date = c(
+    ymd(paste(years_in_data, "09", "01", sep = "-")),
+    ymd(paste(years_in_data, "01", "01", sep = "-")),
+    ymd(paste(years_in_data, "02", "01", sep = "-"))
+    ),
+  
+  type = case_when(
+    month(date) == 2 ~ "Solid", 
+    TRUE ~ "Dotted" 
+    ),
+  
+  label = case_when(
+    month(date) == 9 ~ "Start of Season",
+    month(date) == 1 ~ "End of Season",
+    month(date) == 2 ~ "Super Bowl"
+    )
+  ) |> 
+  filter(date >= min(sb_rev_by_month$month), date <= max(sb_rev_by_month$month))
+
+
+sb_rev_by_month |>
+  mutate(handle_B = handle / 1e9) |>
+  ggplot(aes(x = month, y = handle_B)) +
+  geom_line() +
+  ylab("Handle (in USD, Billions)") +
+  geom_vline(
+    data = nfl_event_dates,
+    aes(xintercept = date, linetype = type),
+    color = "#D50A0A",
+    show.legend = TRUE 
+  ) +
+  scale_linetype_manual(
+    name = "NFL Season", 
+    values = c("Dotted" = "dotted", "Solid" = "solid"), 
+    labels = c("Dotted" = "NFL Regular Season", "Solid" = "Super Bowl") 
+  ) + 
+  theme(legend.position="bottom")
+```
+
+![](Final_Report_files/figure-gfm/unnamed-chunk-2-1.png)<!-- -->
+
+The largest peak in the betting handle clearly coincides with the NFL
+regular season in September, and a smaller dip aligns with the season’s
+end around the Super Bowl.
+
+###### NCAA March Madness
+
+``` r
+ncaa_event_dates = tibble(
+  date = c(
+    ymd(paste(years_in_data, "03", "01", sep = "-"))
+    ),
+  
+  type = case_when(
+    month(date) == 3 ~ "Solid"
+    ),
+  
+  label = case_when(
+    month(date) == 3 ~ "March Madness"
+    )
+  ) |> 
+  filter(date >= min(sb_rev_by_month$month), date <= max(sb_rev_by_month$month))
+
+
+sb_rev_by_month |>
+  mutate(handle_B = handle / 1e9) |>
+  ggplot(aes(x = month, y = handle_B)) +
+  geom_line() +
+  ylab("Handle (in USD, Billions)") +
+  geom_vline(
+    data = ncaa_event_dates,
+    aes(xintercept = date, linetype = type),
+    color = "#009CDE",
+    show.legend = TRUE 
+  ) +
+  scale_linetype_manual(
+    name = "NCAA Events", 
+    values = c("Solid" = "solid"), 
+    labels = c("Solid" = "March Madness") 
+  ) + 
+  theme(legend.position="bottom")
+```
+
+![](Final_Report_files/figure-gfm/unnamed-chunk-3-1.png)<!-- -->
+
+A secondary peak in betting handle occurs during March Madness. This is
+important because it represents a period of intense, short-term betting
+interest.
+
 ##### Cumulative Handle by State
 
 This code uses plotly, which doesn’t render to github document. There is
@@ -328,7 +431,7 @@ sb_rev_by_state_month |>
 ## `.groups` argument.
 ```
 
-![](Final_Report_files/figure-gfm/unnamed-chunk-3-1.png)<!-- -->
+![](Final_Report_files/figure-gfm/unnamed-chunk-5-1.png)<!-- -->
 
 We can see New York has the highest handle which makes sense since it is
 the most populous state. We can get a sense of the popularity of sports
@@ -365,127 +468,10 @@ sb_rev_by_state_month |>
 ## `.groups` argument.
 ```
 
-![](Final_Report_files/figure-gfm/unnamed-chunk-4-1.png)<!-- -->
+![](Final_Report_files/figure-gfm/unnamed-chunk-6-1.png)<!-- -->
 
 We can see that Nevada and New Jersey have the highest handle per
 capita.
-
-##### Understanding Spikes in Sports Betting Handle
-
-In addition to the BRFSS survey, we looked at sports betting data (Total
-Handle) to understand the cyclic nature of the betting market that could
-influence mental health outcomes. The purpose is to determine if the
-spikes in betting activity align with major sports seasons.
-
-###### Overall
-
-``` r
-sb_rev_by_month |> 
-  mutate(handle_B = handle / 1e9) |> 
-  ggplot(aes(x = month, y = handle_B)) + 
-  geom_line() + 
-  ylab("Handle (in USD, Billions)") + 
-  labs(title = "Total Monthly Sports Betting Handle (USD)")
-```
-
-![](Final_Report_files/figure-gfm/unnamed-chunk-5-1.png)<!-- -->
-
-The plot clearly shows strong cyclical trends in total handle,
-suggesting that the volume of betting is highly sensitive to the sports
-calendar.
-
-###### NFL Season
-
-``` r
-nfl_event_dates = tibble(
-  date = c(
-    ymd(paste(years_in_data, "09", "01", sep = "-")),
-    ymd(paste(years_in_data, "01", "01", sep = "-")),
-    ymd(paste(years_in_data, "02", "01", sep = "-"))
-    ),
-  
-  type = case_when(
-    month(date) == 2 ~ "Solid", 
-    TRUE ~ "Dotted" 
-    ),
-  
-  label = case_when(
-    month(date) == 9 ~ "Start of Season",
-    month(date) == 1 ~ "End of Season",
-    month(date) == 2 ~ "Super Bowl"
-    )
-  ) |> 
-  filter(date >= min(sb_rev_by_month$month), date <= max(sb_rev_by_month$month))
-
-
-sb_rev_by_month |>
-  mutate(handle_B = handle / 1e9) |>
-  ggplot(aes(x = month, y = handle_B)) +
-  geom_line() +
-  ylab("Handle (in USD, Billions)") +
-  geom_vline(
-    data = nfl_event_dates,
-    aes(xintercept = date, linetype = type),
-    color = "#D50A0A",
-    show.legend = TRUE 
-  ) +
-  scale_linetype_manual(
-    name = "NFL Season", 
-    values = c("Dotted" = "dotted", "Solid" = "solid"), 
-    labels = c("Dotted" = "NFL Regular Season", "Solid" = "Super Bowl") 
-  ) + 
-  theme(legend.position="bottom")
-```
-
-![](Final_Report_files/figure-gfm/unnamed-chunk-6-1.png)<!-- -->
-
-The largest peak in the betting handle clearly coincides with the NFL
-regular season in September, and a smaller dip aligns with the season’s
-end around the Super Bowl.
-
-###### NCAA March Madness
-
-``` r
-ncaa_event_dates = tibble(
-  date = c(
-    ymd(paste(years_in_data, "03", "01", sep = "-"))
-    ),
-  
-  type = case_when(
-    month(date) == 3 ~ "Solid"
-    ),
-  
-  label = case_when(
-    month(date) == 3 ~ "March Madness"
-    )
-  ) |> 
-  filter(date >= min(sb_rev_by_month$month), date <= max(sb_rev_by_month$month))
-
-
-sb_rev_by_month |>
-  mutate(handle_B = handle / 1e9) |>
-  ggplot(aes(x = month, y = handle_B)) +
-  geom_line() +
-  ylab("Handle (in USD, Billions)") +
-  geom_vline(
-    data = ncaa_event_dates,
-    aes(xintercept = date, linetype = type),
-    color = "#009CDE",
-    show.legend = TRUE 
-  ) +
-  scale_linetype_manual(
-    name = "NCAA Events", 
-    values = c("Solid" = "solid"), 
-    labels = c("Solid" = "March Madness") 
-  ) + 
-  theme(legend.position="bottom")
-```
-
-![](Final_Report_files/figure-gfm/unnamed-chunk-7-1.png)<!-- -->
-
-A secondary peak in betting handle occurs during March Madness. This is
-important because it represents a period of intense, short-term betting
-interest.
 
 ## BRFSS
 
@@ -591,7 +577,7 @@ brfss_data |>
 ## (`stat_count()`).
 ```
 
-![](Final_Report_files/figure-gfm/unnamed-chunk-9-1.png)<!-- -->
+![](Final_Report_files/figure-gfm/unnamed-chunk-8-1.png)<!-- -->
 
 Given the concentration of responses at 0 days, we decided to use a
 binary outcome variable like `any_physical_health_not_good_days` as the
@@ -643,6 +629,14 @@ corr_males =
     tl.cex = 10,
     title = "Correlations: males") +
   theme(plot.title = element_text(hjust = 0.5))
+## Warning: `aes_string()` was deprecated in ggplot2 3.0.0.
+## ℹ Please use tidy evaluation idioms with `aes()`.
+## ℹ See also `vignette("ggplot2-in-packages")` for more information.
+## ℹ The deprecated feature was likely used in the ggcorrplot package.
+##   Please report the issue at <https://github.com/kassambara/ggcorrplot/issues>.
+## This warning is displayed once every 8 hours.
+## Call `lifecycle::last_lifecycle_warnings()` to see where this warning was
+## generated.
   
 corr_females =
   cor(brfss_females,
@@ -660,14 +654,14 @@ corr_females =
 corr_males
 ```
 
-![](Final_Report_files/figure-gfm/unnamed-chunk-11-1.png)<!-- -->
+![](Final_Report_files/figure-gfm/unnamed-chunk-10-1.png)<!-- -->
 
 ``` r
 
 corr_females
 ```
 
-![](Final_Report_files/figure-gfm/unnamed-chunk-11-2.png)<!-- -->
+![](Final_Report_files/figure-gfm/unnamed-chunk-10-2.png)<!-- -->
 
 Overall, the patterns of association between variables were highly
 similar across sexes with no meaningfully different direction or
@@ -694,7 +688,7 @@ cor(brfss_all,
   theme(plot.title = element_text(hjust = 0.5))
 ```
 
-![](Final_Report_files/figure-gfm/unnamed-chunk-12-1.png)<!-- -->
+![](Final_Report_files/figure-gfm/unnamed-chunk-11-1.png)<!-- -->
 
 The correlation matrix revealed redundancy with pairs of variables,
 e.g., `mental_health` vs. `mental_health_not_good_days` (r = 0.99).
@@ -877,7 +871,7 @@ plot_mental_health(
 )
 ```
 
-![](Final_Report_files/figure-gfm/unnamed-chunk-14-1.png)<!-- -->
+![](Final_Report_files/figure-gfm/unnamed-chunk-13-1.png)<!-- -->
 
 The 18-24 and 25-29 age groups have the largest proportion of
 individuals reporting 1-13 and 14+ bad mental health days. Younger
@@ -899,7 +893,7 @@ plot_physical_health(
 ## generated.
 ```
 
-![](Final_Report_files/figure-gfm/unnamed-chunk-15-1.png)<!-- -->
+![](Final_Report_files/figure-gfm/unnamed-chunk-14-1.png)<!-- -->
 
 We can see that overall distributions are very similar across males and
 females. The proportion reporting 14+ days is relatively small and
@@ -916,7 +910,7 @@ plot_depression(
 )
 ```
 
-![](Final_Report_files/figure-gfm/unnamed-chunk-16-1.png)<!-- -->
+![](Final_Report_files/figure-gfm/unnamed-chunk-15-1.png)<!-- -->
 
 The lowest-income groups (less than \$10,000 and \$10,000 to \<\$15,000)
 have the highest proportions of individuals reporting a depressive
@@ -932,7 +926,7 @@ plot_bingedrink(
 )
 ```
 
-![](Final_Report_files/figure-gfm/unnamed-chunk-17-1.png)<!-- -->
+![](Final_Report_files/figure-gfm/unnamed-chunk-16-1.png)<!-- -->
 
 We can see that binge drinking is most common among younger adults with
 the peak in the 25-29 age group. It steadily declines as age increases.
@@ -981,7 +975,7 @@ prop_tests_state =
 combine_plots(prop_tests_state)
 ```
 
-<img src="Final_Report_files/figure-gfm/unnamed-chunk-18-1.png" width="95%" />
+<img src="Final_Report_files/figure-gfm/unnamed-chunk-17-1.png" width="95%" />
 
 The second test we wanted to run used each state’s specific legalization
 date, `sb_legal`, as the inflection point. We also repeated this test
@@ -1010,7 +1004,7 @@ prop_tests_sb_legal =
 combine_plots(prop_tests_sb_legal)
 ```
 
-<img src="Final_Report_files/figure-gfm/unnamed-chunk-19-1.png" width="95%" />
+<img src="Final_Report_files/figure-gfm/unnamed-chunk-18-1.png" width="95%" />
 
 ``` r
 prop_tests_sb_legal = 
@@ -1030,7 +1024,7 @@ prop_tests_sb_legal =
 combine_plots(prop_tests_sb_legal)
 ```
 
-<img src="Final_Report_files/figure-gfm/unnamed-chunk-20-1.png" width="95%" />
+<img src="Final_Report_files/figure-gfm/unnamed-chunk-19-1.png" width="95%" />
 
 ##### Relative Risk of Poor Mental Health Outcomes in Legal vs. Non-Legal states in 2024
 
@@ -1306,7 +1300,7 @@ pred_df |>
 ## generated.
 ```
 
-![](Final_Report_files/figure-gfm/unnamed-chunk-25-1.png)<!-- -->
+![](Final_Report_files/figure-gfm/unnamed-chunk-24-1.png)<!-- -->
 
 # 7. Discussion
 

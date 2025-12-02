@@ -35,8 +35,6 @@ state_pop = read_csv(here("data", "state_population_census.csv"))
 years_in_data = unique(year(pull(sb_rev_by_month, month)))
 
 outcome_vars = c("any_physical_health_not_good_days", "any_mental_health_not_good_days", "has_depressive_disorder", "has_binge_drink")
-
-theme_set(theme_minimal() + theme(legend.position = "bottom"))
 ```
 
 # 1. Motivation
@@ -127,6 +125,96 @@ sb_rev_by_month |>
   ) +
   theme_minimal()
 ```
+
+The plot shows handle going up with the number of states that have legalized sports betting. It also clearly shows strong cyclical trends in total handle, suggesting that the volume of betting is highly sensitive to the sports calendar.
+
+##### Understanding Spikes in Sports Betting Handle
+
+In addition to the BRFSS survey, we looked at sports betting data (Total Handle) to understand the cyclic nature of the betting market that could influence mental health outcomes. The purpose is to determine if the spikes in betting activity align with major sports seasons.
+
+###### NFL Season 
+```{r}
+nfl_event_dates = tibble(
+  date = c(
+    ymd(paste(years_in_data, "09", "01", sep = "-")),
+    ymd(paste(years_in_data, "01", "01", sep = "-")),
+    ymd(paste(years_in_data, "02", "01", sep = "-"))
+    ),
+  
+  type = case_when(
+    month(date) == 2 ~ "Solid", 
+    TRUE ~ "Dotted" 
+    ),
+  
+  label = case_when(
+    month(date) == 9 ~ "Start of Season",
+    month(date) == 1 ~ "End of Season",
+    month(date) == 2 ~ "Super Bowl"
+    )
+  ) |> 
+  filter(date >= min(sb_rev_by_month$month), date <= max(sb_rev_by_month$month))
+
+
+sb_rev_by_month |>
+  mutate(handle_B = handle / 1e9) |>
+  ggplot(aes(x = month, y = handle_B)) +
+  geom_line() +
+  ylab("Handle (in USD, Billions)") +
+  geom_vline(
+    data = nfl_event_dates,
+    aes(xintercept = date, linetype = type),
+    color = "#D50A0A",
+    show.legend = TRUE 
+  ) +
+  scale_linetype_manual(
+    name = "NFL Season", 
+    values = c("Dotted" = "dotted", "Solid" = "solid"), 
+    labels = c("Dotted" = "NFL Regular Season", "Solid" = "Super Bowl") 
+  ) + 
+  theme(legend.position="bottom")
+```
+
+The largest peak in the betting handle clearly coincides with the NFL regular season in September, and a smaller dip aligns with the season's end around the Super Bowl. 
+
+###### NCAA March Madness
+```{r}
+ncaa_event_dates = tibble(
+  date = c(
+    ymd(paste(years_in_data, "03", "01", sep = "-"))
+    ),
+  
+  type = case_when(
+    month(date) == 3 ~ "Solid"
+    ),
+  
+  label = case_when(
+    month(date) == 3 ~ "March Madness"
+    )
+  ) |> 
+  filter(date >= min(sb_rev_by_month$month), date <= max(sb_rev_by_month$month))
+
+
+sb_rev_by_month |>
+  mutate(handle_B = handle / 1e9) |>
+  ggplot(aes(x = month, y = handle_B)) +
+  geom_line() +
+  ylab("Handle (in USD, Billions)") +
+  geom_vline(
+    data = ncaa_event_dates,
+    aes(xintercept = date, linetype = type),
+    color = "#009CDE",
+    show.legend = TRUE 
+  ) +
+  scale_linetype_manual(
+    name = "NCAA Events", 
+    values = c("Solid" = "solid"), 
+    labels = c("Solid" = "March Madness") 
+  ) + 
+  theme(legend.position="bottom")
+
+```
+
+A secondary peak in betting handle occurs during March Madness. This is important because it represents a period of intense, short-term betting interest. 
 
 ##### Cumulative Handle by State
 
@@ -240,106 +328,6 @@ sb_rev_by_state_month |>
 ```
 
 We can see that Nevada and New Jersey have the highest handle per capita.
-
-##### Understanding Spikes in Sports Betting Handle
-
-In addition to the BRFSS survey, we looked at sports betting data (Total Handle) to understand the cyclic nature of the betting market that could influence mental health outcomes. The purpose is to determine if the spikes in betting activity align with major sports seasons.
-
-###### Overall 
-```{r}
-sb_rev_by_month |> 
-  mutate(handle_B = handle / 1e9) |> 
-  ggplot(aes(x = month, y = handle_B)) + 
-  geom_line() + 
-  ylab("Handle (in USD, Billions)") + 
-  labs(title = "Total Monthly Sports Betting Handle (USD)")
-```
-
-The plot clearly shows strong cyclical trends in total handle, suggesting that the volume of betting is highly sensitive to the sports calendar.
-
-###### NFL Season 
-```{r}
-nfl_event_dates = tibble(
-  date = c(
-    ymd(paste(years_in_data, "09", "01", sep = "-")),
-    ymd(paste(years_in_data, "01", "01", sep = "-")),
-    ymd(paste(years_in_data, "02", "01", sep = "-"))
-    ),
-  
-  type = case_when(
-    month(date) == 2 ~ "Solid", 
-    TRUE ~ "Dotted" 
-    ),
-  
-  label = case_when(
-    month(date) == 9 ~ "Start of Season",
-    month(date) == 1 ~ "End of Season",
-    month(date) == 2 ~ "Super Bowl"
-    )
-  ) |> 
-  filter(date >= min(sb_rev_by_month$month), date <= max(sb_rev_by_month$month))
-
-
-sb_rev_by_month |>
-  mutate(handle_B = handle / 1e9) |>
-  ggplot(aes(x = month, y = handle_B)) +
-  geom_line() +
-  ylab("Handle (in USD, Billions)") +
-  geom_vline(
-    data = nfl_event_dates,
-    aes(xintercept = date, linetype = type),
-    color = "#D50A0A",
-    show.legend = TRUE 
-  ) +
-  scale_linetype_manual(
-    name = "NFL Season", 
-    values = c("Dotted" = "dotted", "Solid" = "solid"), 
-    labels = c("Dotted" = "NFL Regular Season", "Solid" = "Super Bowl") 
-  ) + 
-  theme(legend.position="bottom")
-```
-
-The largest peak in the betting handle clearly coincides with the NFL regular season in September, and a smaller dip aligns with the season's end around the Super Bowl. 
-
-###### NCAA March Madness
-```{r}
-ncaa_event_dates = tibble(
-  date = c(
-    ymd(paste(years_in_data, "03", "01", sep = "-"))
-    ),
-  
-  type = case_when(
-    month(date) == 3 ~ "Solid"
-    ),
-  
-  label = case_when(
-    month(date) == 3 ~ "March Madness"
-    )
-  ) |> 
-  filter(date >= min(sb_rev_by_month$month), date <= max(sb_rev_by_month$month))
-
-
-sb_rev_by_month |>
-  mutate(handle_B = handle / 1e9) |>
-  ggplot(aes(x = month, y = handle_B)) +
-  geom_line() +
-  ylab("Handle (in USD, Billions)") +
-  geom_vline(
-    data = ncaa_event_dates,
-    aes(xintercept = date, linetype = type),
-    color = "#009CDE",
-    show.legend = TRUE 
-  ) +
-  scale_linetype_manual(
-    name = "NCAA Events", 
-    values = c("Solid" = "solid"), 
-    labels = c("Solid" = "March Madness") 
-  ) + 
-  theme(legend.position="bottom")
-
-```
-
-A secondary peak in betting handle occurs during March Madness. This is important because it represents a period of intense, short-term betting interest. 
 
 ## BRFSS
 
