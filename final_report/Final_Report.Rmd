@@ -211,7 +211,6 @@ sb_rev_by_month |>
     labels = c("Solid" = "March Madness") 
   ) + 
   theme(legend.position="bottom")
-
 ```
 
 A secondary peak in betting handle occurs during March Madness. This is important because it represents a period of intense, short-term betting interest. 
