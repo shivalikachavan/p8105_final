@@ -145,7 +145,46 @@ in terms of variable coding and questions asked. As a result, extensive
 cleaning and standardization was required. This process was handled with
 several
 [source](https://github.com/shivalikachavan/p8105_final/tree/main/source)
-files. More detailed explanations of this process are available in
+files.
+
+The initial cleaning takes a while to run, so it is included but not
+evaluated here:
+
+``` r
+read_standardize_clean = function(datayear, filepath) {
+  
+  print(datayear)
+  
+  cleaned_data = 
+    read_xpt(filepath) |> 
+    janitor::clean_names() |> 
+    standardize_brfss_variable() |> 
+    filter_brfss_data(data_year = datayear)
+  
+  cleaned_data
+}
+
+data_years = 2017:2024
+filepaths <- here::here("data", "raw_data", "brfss", paste0("LLCP", data_years, ".XPT"))
+
+data = 
+  tibble(
+    data_year = data_years,
+    filepath = filepaths,
+    cleaned_dfs = map2(data_year, filepath, read_standardize_clean)
+  ) |> 
+  select(cleaned_dfs) |> 
+  unnest(cols = c(cleaned_dfs)) 
+
+data |> write_csv(here::here("data", "brfss_clean_2017_2024.csv")) # has some duplicate variables, handled in load/clean step
+```
+
+This chunk takes the downloaded .XPT files available through the CDC
+website (~9 GB total!), standardizes and filters the individual years,
+concatenates the data from each year, and saves the final dataset as a
+csv. This cleaned csv is then zipped and loaded in subsequent
+operations. A more detailed explanations of this process are available
+in
 [brfss_data_exploration.Rmd](https://github.com/shivalikachavan/p8105_final/blob/main/eda/brfss_data_exploration.Rmd)
 and
 [brfss_data_cleaning.Rmd](https://github.com/shivalikachavan/p8105_final/blob/main/eda/brfss_data_cleaning.Rmd).
@@ -236,7 +275,7 @@ sb_rev_by_month |>
   theme_minimal()
 ```
 
-![](Final_Report_files/figure-gfm/unnamed-chunk-1-1.png)<!-- -->
+![](Final_Report_files/figure-gfm/unnamed-chunk-2-1.png)<!-- -->
 
 The plot shows handle going up with the number of states that have
 legalized sports betting. It also clearly shows strong cyclical trends
@@ -293,7 +332,7 @@ sb_rev_by_month |>
   theme(legend.position="bottom")
 ```
 
-![](Final_Report_files/figure-gfm/unnamed-chunk-2-1.png)<!-- -->
+![](Final_Report_files/figure-gfm/unnamed-chunk-3-1.png)<!-- -->
 
 The largest peak in the betting handle clearly coincides with the NFL
 regular season in September, and a smaller dip aligns with the season’s
@@ -337,7 +376,7 @@ sb_rev_by_month |>
   theme(legend.position="bottom")
 ```
 
-![](Final_Report_files/figure-gfm/unnamed-chunk-3-1.png)<!-- -->
+![](Final_Report_files/figure-gfm/unnamed-chunk-4-1.png)<!-- -->
 
 A secondary peak in betting handle occurs during March Madness. This is
 important because it represents a period of intense, short-term betting
@@ -431,7 +470,7 @@ sb_rev_by_state_month |>
 ## `.groups` argument.
 ```
 
-![](Final_Report_files/figure-gfm/unnamed-chunk-5-1.png)<!-- -->
+![](Final_Report_files/figure-gfm/unnamed-chunk-6-1.png)<!-- -->
 
 We can see New York has the highest handle which makes sense since it is
 the most populous state. We can get a sense of the popularity of sports
@@ -468,7 +507,7 @@ sb_rev_by_state_month |>
 ## `.groups` argument.
 ```
 
-![](Final_Report_files/figure-gfm/unnamed-chunk-6-1.png)<!-- -->
+![](Final_Report_files/figure-gfm/unnamed-chunk-7-1.png)<!-- -->
 
 We can see that Nevada and New Jersey have the highest handle per
 capita.
@@ -577,7 +616,7 @@ brfss_data |>
 ## (`stat_count()`).
 ```
 
-![](Final_Report_files/figure-gfm/unnamed-chunk-8-1.png)<!-- -->
+![](Final_Report_files/figure-gfm/unnamed-chunk-9-1.png)<!-- -->
 
 Given the concentration of responses at 0 days, we decided to use a
 binary outcome variable like `any_physical_health_not_good_days` as the
@@ -629,14 +668,6 @@ corr_males =
     tl.cex = 10,
     title = "Correlations: males") +
   theme(plot.title = element_text(hjust = 0.5))
-## Warning: `aes_string()` was deprecated in ggplot2 3.0.0.
-## ℹ Please use tidy evaluation idioms with `aes()`.
-## ℹ See also `vignette("ggplot2-in-packages")` for more information.
-## ℹ The deprecated feature was likely used in the ggcorrplot package.
-##   Please report the issue at <https://github.com/kassambara/ggcorrplot/issues>.
-## This warning is displayed once every 8 hours.
-## Call `lifecycle::last_lifecycle_warnings()` to see where this warning was
-## generated.
   
 corr_females =
   cor(brfss_females,
@@ -654,14 +685,14 @@ corr_females =
 corr_males
 ```
 
-![](Final_Report_files/figure-gfm/unnamed-chunk-10-1.png)<!-- -->
+![](Final_Report_files/figure-gfm/unnamed-chunk-11-1.png)<!-- -->
 
 ``` r
 
 corr_females
 ```
 
-![](Final_Report_files/figure-gfm/unnamed-chunk-10-2.png)<!-- -->
+![](Final_Report_files/figure-gfm/unnamed-chunk-11-2.png)<!-- -->
 
 Overall, the patterns of association between variables were highly
 similar across sexes with no meaningfully different direction or
@@ -688,7 +719,7 @@ cor(brfss_all,
   theme(plot.title = element_text(hjust = 0.5))
 ```
 
-![](Final_Report_files/figure-gfm/unnamed-chunk-11-1.png)<!-- -->
+![](Final_Report_files/figure-gfm/unnamed-chunk-12-1.png)<!-- -->
 
 The correlation matrix revealed redundancy with pairs of variables,
 e.g., `mental_health` vs. `mental_health_not_good_days` (r = 0.99).
@@ -871,7 +902,7 @@ plot_mental_health(
 )
 ```
 
-![](Final_Report_files/figure-gfm/unnamed-chunk-13-1.png)<!-- -->
+![](Final_Report_files/figure-gfm/unnamed-chunk-14-1.png)<!-- -->
 
 The 18-24 and 25-29 age groups have the largest proportion of
 individuals reporting 1-13 and 14+ bad mental health days. Younger
@@ -893,7 +924,7 @@ plot_physical_health(
 ## generated.
 ```
 
-![](Final_Report_files/figure-gfm/unnamed-chunk-14-1.png)<!-- -->
+![](Final_Report_files/figure-gfm/unnamed-chunk-15-1.png)<!-- -->
 
 We can see that overall distributions are very similar across males and
 females. The proportion reporting 14+ days is relatively small and
@@ -910,7 +941,7 @@ plot_depression(
 )
 ```
 
-![](Final_Report_files/figure-gfm/unnamed-chunk-15-1.png)<!-- -->
+![](Final_Report_files/figure-gfm/unnamed-chunk-16-1.png)<!-- -->
 
 The lowest-income groups (less than \$10,000 and \$10,000 to \<\$15,000)
 have the highest proportions of individuals reporting a depressive
@@ -926,7 +957,7 @@ plot_bingedrink(
 )
 ```
 
-![](Final_Report_files/figure-gfm/unnamed-chunk-16-1.png)<!-- -->
+![](Final_Report_files/figure-gfm/unnamed-chunk-17-1.png)<!-- -->
 
 We can see that binge drinking is most common among younger adults with
 the peak in the 25-29 age group. It steadily declines as age increases.
@@ -975,7 +1006,7 @@ prop_tests_state =
 combine_plots(prop_tests_state)
 ```
 
-<img src="Final_Report_files/figure-gfm/unnamed-chunk-17-1.png" width="95%" />
+<img src="Final_Report_files/figure-gfm/unnamed-chunk-18-1.png" width="95%" />
 
 The second test we wanted to run used each state’s specific legalization
 date, `sb_legal`, as the inflection point. We also repeated this test
@@ -1004,7 +1035,7 @@ prop_tests_sb_legal =
 combine_plots(prop_tests_sb_legal)
 ```
 
-<img src="Final_Report_files/figure-gfm/unnamed-chunk-18-1.png" width="95%" />
+<img src="Final_Report_files/figure-gfm/unnamed-chunk-19-1.png" width="95%" />
 
 ``` r
 prop_tests_sb_legal = 
@@ -1024,7 +1055,7 @@ prop_tests_sb_legal =
 combine_plots(prop_tests_sb_legal)
 ```
 
-<img src="Final_Report_files/figure-gfm/unnamed-chunk-19-1.png" width="95%" />
+<img src="Final_Report_files/figure-gfm/unnamed-chunk-20-1.png" width="95%" />
 
 ##### Relative Risk of Poor Mental Health Outcomes in Legal vs. Non-Legal states in 2024
 
@@ -1300,7 +1331,7 @@ pred_df |>
 ## generated.
 ```
 
-![](Final_Report_files/figure-gfm/unnamed-chunk-24-1.png)<!-- -->
+![](Final_Report_files/figure-gfm/unnamed-chunk-25-1.png)<!-- -->
 
 # 7. Discussion
 

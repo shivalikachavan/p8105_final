@@ -71,7 +71,39 @@ For information on sports betting we scraped data from [Legal Sports Report](htt
 The code to scrape Legal Sports Report is in `get_sports_betting_data.R`. The process was straightforward, with two summary tables at the top and separate tables for each state below. We pulled all html tables and iterated through the state headers to aggregate data for all states. There were a few states with no data (Florida, New Mexico, North Dakota, Washington, and Wisconsin).
 
 ##### Cleaning
-Across the years, there have been many iterations of the BRFSS survey, in terms of variable coding and questions asked. As a result, extensive cleaning and standardization was required. This process was handled with several [source](https://github.com/shivalikachavan/p8105_final/tree/main/source) files. More detailed explanations of this process are available in [brfss_data_exploration.Rmd](https://github.com/shivalikachavan/p8105_final/blob/main/eda/brfss_data_exploration.Rmd) and [brfss_data_cleaning.Rmd](https://github.com/shivalikachavan/p8105_final/blob/main/eda/brfss_data_cleaning.Rmd).
+Across the years, there have been many iterations of the BRFSS survey, in terms of variable coding and questions asked. As a result, extensive cleaning and standardization was required. This process was handled with several [source](https://github.com/shivalikachavan/p8105_final/tree/main/source) files. 
+
+The initial cleaning takes a while to run, so it is included but not evaluated here:
+```{r eval=FALSE}
+read_standardize_clean = function(datayear, filepath) {
+  
+  print(datayear)
+  
+  cleaned_data = 
+    read_xpt(filepath) |> 
+    janitor::clean_names() |> 
+    standardize_brfss_variable() |> 
+    filter_brfss_data(data_year = datayear)
+  
+  cleaned_data
+}
+
+data_years = 2017:2024
+filepaths <- here::here("data", "raw_data", "brfss", paste0("LLCP", data_years, ".XPT"))
+
+data = 
+  tibble(
+    data_year = data_years,
+    filepath = filepaths,
+    cleaned_dfs = map2(data_year, filepath, read_standardize_clean)
+  ) |> 
+  select(cleaned_dfs) |> 
+  unnest(cols = c(cleaned_dfs)) 
+
+data |> write_csv(here::here("data", "brfss_clean_2017_2024.csv")) # has some duplicate variables, handled in load/clean step
+```
+
+This chunk takes the downloaded .XPT files available through the CDC website (~9 GB total!), standardizes and filters the individual years, concatenates the data from each year, and saves the final dataset as a csv. This cleaned csv is then zipped and loaded in subsequent operations. A more detailed explanations of this process are available in [brfss_data_exploration.Rmd](https://github.com/shivalikachavan/p8105_final/blob/main/eda/brfss_data_exploration.Rmd) and [brfss_data_cleaning.Rmd](https://github.com/shivalikachavan/p8105_final/blob/main/eda/brfss_data_cleaning.Rmd).
 
   * [standardize_brfss_variable.R](https://github.com/shivalikachavan/p8105_final/blob/main/source/standardize_brfss_variable.R): This function renames variables that have more than one version of the same variable (e.g. `HLTHPL1` and `HLTHPL2`). Seeing that the variables differed in name only (the responses were coded in the same way), this was handled by renaming different versions to the single standardized name. (e.g. `hlthpl_standard`). 
   * [filter_brfss_data.R](https://github.com/shivalikachavan/p8105_final/blob/main/source/filter_brfss_data.R): This function keeps the key variables for our study (unique survey identifiers, demographic/predictor variables, health/financial outcomes variables). It also filters for completed interviews (`dispcode = 1100`) and converts the date of the interview to a Date type variable. 
