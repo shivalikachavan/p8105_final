@@ -1,0 +1,228 @@
+---
+title: "Shiny Dashboard"
+output: 
+  flexdashboard::flex_dashboard:
+    orientation: rows
+    vertical_layout: fill
+runtime: shiny
+---
+
+```{r setup, include=FALSE}
+library(flexdashboard)
+library(tidyverse)
+library(plotly)
+
+source(here::here("source", "load_clean_brfss.R"))
+brfss_data = load_clean_brfss(here::here("data", "brfss_clean_2017_2024.csv.zip"))
+```
+
+
+```{r}
+brfss_data =
+  brfss_data |> 
+  mutate(
+    marital_status = factor(
+      marital_status,
+      levels = c(
+        "Married",
+        "Member of an unmarried couple (Partner)",
+        "Never Married",
+        "Divorced",
+        "Separated",
+        "Widowed")
+    ),
+    education_status = factor(
+      education_status,
+      levels = c(
+        "Did not graduate High School",
+        "Graduated High School",
+        "Attended College or Technical School",
+        "Graduated from College or Technical School")
+    ),
+    income_level = factor(
+      income_level,
+      levels = c(
+        "Less than $10,000",
+        "$10,000 to < $15,000",
+        "$15,000 to < $20,000",
+        "$20,000 to < $25,000",
+        "$25,000 to < $35,000",
+        "$35,000 to < $50,000",
+        "$50,000 to < $75,000",
+        "$75,000 or more")
+    ),
+    employment_status = factor(
+      employment_status,
+      levels = c(
+        "Employed for wages",
+        "Self-employed",
+        "Homemaker",
+        "Student",
+        "Out of work (<1 year)",
+        "Out of work (>1 year)",
+        "Retired",
+        "Unable to work (Disabled)")
+    )
+  ) |> 
+  drop_na(age_group_5yr, urban_status, sex, marital_status, 
+          education_status, employment_status, income_level, race, 
+          insurance_coverage, mental_health_not_good_days,
+          physical_health_not_good_days, depressive_disorder, binge_drink
+          ) |> 
+  rename(
+    "Age Group" = age_group_5yr,
+    "Urban Status" = urban_status,
+    "Sex" = sex,
+    "Marital Status" = marital_status,
+    "Education Status" = education_status,
+    "Employment Status" = employment_status,
+    "Income Level" = income_level,
+    "Race" = race,
+    "Insurance Coverage" = insurance_coverage,
+  )
+
+demographics = c("Age Group", "Sex", "Race", "Education Status", "Income Level", 
+                 "Employment Status","Marital Status", "Insurance Coverage",
+                 "Urban Status")
+    
+```
+
+
+Column {.sidebar}
+-----------------------------------------------------------------------
+
+```{r}
+#radioButtons widget
+radioButtons(
+  "demo_choice", 
+  label = h3("Choose Demographic/Socioeconomic Characteristic"),
+  choices = demographics, selected = "Age Group")
+```
+
+Row
+-----------------------------------------------------------------------
+
+### Chart A
+
+```{r}
+#Bad Mental Health Days
+renderPlotly({
+
+  demo_var = input$demo_choice
+
+  brfss_data |>
+    count(.data[[demo_var]], mental_health_not_good_days, name = "n") |>
+    group_by(.data[[demo_var]]) |>
+    mutate(prop = n / sum(n)) |>
+    plot_ly(
+      x = ~ .data[[demo_var]],
+      y = ~ prop,
+      color = ~ mental_health_not_good_days,
+      type = "bar"
+    ) |>
+    layout(
+      barmode = "stack",
+      yaxis = list(title = demo_var),
+      xaxis = list(title = "Proportion"),
+      title = paste("Distribution of Bad Mental Health Days")
+    )
+})
+
+```
+
+
+
+### Chart B
+
+```{r}
+#Bad Physical Health Days
+renderPlotly({
+
+  demo_var = input$demo_choice
+
+  brfss_data |>
+    count(.data[[demo_var]], physical_health_not_good_days, name = "n") |>
+    group_by(.data[[demo_var]]) |>
+    mutate(prop = n / sum(n)) |>
+    plot_ly(
+      x = ~ .data[[demo_var]],
+      y = ~ prop,
+      color = ~ physical_health_not_good_days,
+      type = "bar"
+    ) |>
+    layout(
+      barmode = "stack",
+      yaxis = list(title = "Proportion"),
+      xaxis = list(title = demo_var),
+      title = paste("Distribution of Bad Physical Health Days")
+    )
+
+})
+```
+
+Row
+-----------------------------------------------------------------------
+
+### Chart C
+
+```{r}
+#Depressive Disorder
+renderPlotly({
+
+  demo_var = input$demo_choice
+
+  brfss_data |>
+    count(.data[[demo_var]], depressive_disorder, name = "n") |>
+    group_by(.data[[demo_var]]) |>
+    mutate(prop = n / sum(n)) |>
+    plot_ly(
+      x = ~ .data[[demo_var]],
+      y = ~ prop,
+      color = ~ depressive_disorder,
+      type = "bar"
+    ) |>
+    layout(
+      barmode = "stack",
+      yaxis = list(title = "Proportion"),
+      xaxis = list(title = demo_var),
+      title = paste("Distribution of Depressive Disorder")
+    )
+
+})
+```
+
+
+### Chart D
+
+```{r}
+#Binge Drink
+renderPlotly({
+
+  demo_var = input$demo_choice
+
+  brfss_data |>
+    count(.data[[demo_var]], binge_drink, name = "n") |>
+    group_by(.data[[demo_var]]) |>
+    mutate(prop = n / sum(n)) |>
+    plot_ly(
+      x = ~ .data[[demo_var]],
+      y = ~ prop,
+      color = ~ binge_drink,
+      type = "bar"
+    ) |>
+    layout(
+      barmode = "stack",
+      yaxis = list(title = "Proportion"),
+      xaxis = list(title = demo_var),
+      title = paste("Distribution of Binge Drinkers")
+    )
+
+})
+```
+
+
+
+
+
+
+
